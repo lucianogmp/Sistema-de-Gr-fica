@@ -3,65 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard V3</title>
+  <title>Dashboard V4</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; }
     body { margin:0; font-family: Arial; display:flex; background:#eef1f5; }
 
-    .sidebar {
-      width:240px; background:#2f3b52; color:#fff; height:100vh; padding:20px;
-    }
-    .sidebar h2 { margin-bottom:20px; }
-    .menu-item {
-      padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer;
-    }
+    .sidebar { width:240px; background:#2f3b52; color:#fff; height:100vh; padding:20px; }
+    .menu-item { padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; }
     .menu-item:hover { background:#3f4d6b; }
 
     .main { flex:1; display:flex; flex-direction:column; }
-
-    .topbar {
-      background:#fff; padding:15px 20px; border-bottom:1px solid #ddd;
-      display:flex; justify-content:space-between;
-    }
-
+    .topbar { background:#fff; padding:15px 20px; border-bottom:1px solid #ddd; }
     .content { padding:20px; }
 
-    .grid {
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap:15px;
-      margin-bottom:20px;
-    }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px; }
 
-    .card {
-      background:#fff; padding:15px; border-radius:12px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.05);
-    }
+    .card { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
+    .green { border-left:5px solid #28a745; }
+    .red { border-left:5px solid #dc3545; }
+    .blue { border-left:5px solid #007bff; }
 
-    .card.green { border-left:5px solid #28a745; }
-    .card.red { border-left:5px solid #dc3545; }
-    .card.blue { border-left:5px solid #007bff; }
-
-    input, select {
-      width:100%; padding:8px; margin:5px 0;
-    }
-
-    button {
-      padding:10px; border:none; border-radius:8px;
-      background:#007bff; color:#fff; cursor:pointer;
-    }
+    input, select { width:100%; padding:8px; margin:5px 0; }
+    button { padding:10px; border:none; border-radius:8px; background:#007bff; color:#fff; cursor:pointer; }
 
     ul { list-style:none; padding:0; }
-    li {
-      background:#f9f9f9; padding:10px; margin-bottom:8px;
-      border-radius:8px; display:flex; justify-content:space-between;
-    }
+    li { background:#f9f9f9; padding:10px; margin-bottom:8px; border-radius:8px; display:flex; justify-content:space-between; }
 
-    .delete-btn {
-      background:#dc3545; padding:5px 10px; border:none; color:#fff; cursor:pointer;
-      border-radius:6px;
-    }
+    .tag { padding:3px 8px; border-radius:6px; font-size:12px; }
+    .pago { background:#28a745; color:#fff; }
+    .pendente { background:#ffc107; }
   </style>
 </head>
 <body>
@@ -70,96 +41,55 @@
   <h2>Painel</h2>
   <div class="menu-item" onclick="showTab('dashboard')">Dashboard</div>
   <div class="menu-item" onclick="showTab('vendas')">Vendas</div>
-  <div class="menu-item" onclick="showTab('financeiro')">Financeiro</div>
-  <div class="menu-item" onclick="showTab('clientes')">Clientes</div>
-  <div class="menu-item" onclick="showTab('produtos')">Produtos</div>
+  <div class="menu-item" onclick="showTab('orcamento')">Orçamento</div>
 </div>
 
 <div class="main">
-
-  <div class="topbar">
-    <strong>Painel inicial</strong>
-  </div>
+  <div class="topbar"><strong>Painel V4</strong></div>
 
   <div class="content">
 
     <div id="dashboard" class="tab">
-
       <div class="grid">
-        <div class="card green">
-          <h4>Faturamento</h4>
-          <p id="faturamento"></p>
-        </div>
-        <div class="card red">
-          <h4>Custos</h4>
-          <p id="custos"></p>
-        </div>
-        <div class="card blue">
-          <h4>Lucro</h4>
-          <p id="lucro"></p>
-        </div>
+        <div class="card green"><h4>Faturamento</h4><p id="fat"></p></div>
+        <div class="card red"><h4>Custos</h4><p id="cus"></p></div>
+        <div class="card blue"><h4>Lucro</h4><p id="luc"></p></div>
       </div>
-
-      <div class="card">
-        <h3>Vendas por mês</h3>
-        <canvas id="grafico"></canvas>
-      </div>
-
+      <div class="card"><canvas id="grafico"></canvas></div>
     </div>
 
     <div id="vendas" class="tab" style="display:none">
-
       <div class="card">
         <h3>Registrar Venda</h3>
-        <input type="text" id="cliente" placeholder="Cliente">
-        <select id="tipo">
-          <option value="Vinil">Vinil</option>
-          <option value="Papel">Papel</option>
-          <option value="Outro">Outro</option>
+        <input id="cliente" placeholder="Cliente">
+        <input id="valor" type="number" placeholder="Valor">
+        <input id="custo" type="number" placeholder="Custo">
+        <select id="status">
+          <option value="pago">Pago</option>
+          <option value="pendente">Pendente</option>
         </select>
-        <input type="number" id="valorVenda" placeholder="Valor">
-        <input type="number" id="custoVenda" placeholder="Custo">
         <button onclick="salvarVenda()">Salvar</button>
       </div>
 
       <div class="card">
-        <h3>Histórico</h3>
-        <label>Filtrar mês:</label>
-        <select id="filtroMes" onchange="renderLista()">
-          <option value="todos">Todos</option>
-          <option value="0">Jan</option>
-          <option value="1">Fev</option>
-          <option value="2">Mar</option>
-          <option value="3">Abr</option>
-          <option value="4">Mai</option>
-          <option value="5">Jun</option>
-          <option value="6">Jul</option>
-          <option value="7">Ago</option>
-          <option value="8">Set</option>
-          <option value="9">Out</option>
-          <option value="10">Nov</option>
-          <option value="11">Dez</option>
-        </select>
-        <ul id="listaVendas"></ul>
+        <h3>Vendas</h3>
+        <ul id="lista"></ul>
       </div>
-
     </div>
 
-    <div id="financeiro" class="tab" style="display:none">
+    <div id="orcamento" class="tab" style="display:none">
       <div class="card">
-        <h3>Resumo financeiro</h3>
-        <p><strong>Faturamento:</strong> <span id="faturamento2"></span></p>
-        <p><strong>Custos:</strong> <span id="custos2"></span></p>
-        <p><strong>Lucro:</strong> <span id="lucro2"></span></p>
+        <h3>Gerar Orçamento</h3>
+        <input id="largura" type="number" placeholder="Largura (cm)">
+        <input id="altura" type="number" placeholder="Altura (cm)">
+        <select id="material">
+          <option value="90">Vinil (R$90/m²)</option>
+          <option value="60">Papel (R$60/m²)</option>
+        </select>
+        <button onclick="gerarOrcamento()">Calcular</button>
+        <p id="resultado"></p>
+        <button onclick="converterVenda()">Converter em venda</button>
       </div>
-    </div>
-
-    <div id="clientes" class="tab" style="display:none">
-      <div class="card">Clientes (em breve)</div>
-    </div>
-
-    <div id="produtos" class="tab" style="display:none">
-      <div class="card">Produtos (em breve)</div>
     </div>
 
   </div>
@@ -167,76 +97,64 @@
 
 <script>
 let vendas = JSON.parse(localStorage.getItem('vendas')) || [];
+let ultimoOrcamento = null;
 
-function showTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.style.display='none');
-  document.getElementById(tab).style.display='block';
-}
+function showTab(tab){ document.querySelectorAll('.tab').forEach(t=>t.style.display='none'); document.getElementById(tab).style.display='block'; }
 
-function salvarVenda() {
-  let cliente = document.getElementById('cliente').value;
-  let tipo = document.getElementById('tipo').value;
-  let valor = parseFloat(document.getElementById('valorVenda').value);
-  let custo = parseFloat(document.getElementById('custoVenda').value);
-
-  if(!valor || !custo) return;
-
-  let mes = new Date().getMonth();
-  vendas.push({cliente,tipo,valor,custo,mes});
-  localStorage.setItem('vendas', JSON.stringify(vendas));
-
-  atualizar();
-}
-
-function excluirVenda(index) {
-  vendas.splice(index,1);
+function salvarVenda(){
+  let v = {
+    cliente: cliente.value,
+    valor: parseFloat(valor.value),
+    custo: parseFloat(custo.value),
+    status: status.value,
+    mes: new Date().getMonth()
+  };
+  vendas.push(v);
   localStorage.setItem('vendas', JSON.stringify(vendas));
   atualizar();
 }
 
-function atualizar() {
+function gerarOrcamento(){
+  let m2 = (largura.value/100)*(altura.value/100);
+  let preco = m2 * material.value;
+  ultimoOrcamento = preco;
+  resultado.innerText = 'Valor: R$ ' + preco.toFixed(2);
+}
+
+function converterVenda(){
+  if(!ultimoOrcamento) return;
+  vendas.push({cliente:'Orçamento', valor:ultimoOrcamento, custo:ultimoOrcamento*0.6, status:'pendente', mes:new Date().getMonth()});
+  localStorage.setItem('vendas', JSON.stringify(vendas));
+  atualizar();
+}
+
+function atualizar(){
   let fat = vendas.reduce((a,v)=>a+v.valor,0);
   let cus = vendas.reduce((a,v)=>a+v.custo,0);
-  let luc = fat - cus;
+  let luc = fat-cus;
 
-  document.getElementById('faturamento').innerText = 'R$ '+fat.toFixed(2);
-  document.getElementById('custos').innerText = 'R$ '+cus.toFixed(2);
-  document.getElementById('lucro').innerText = 'R$ '+luc.toFixed(2);
-
-  document.getElementById('faturamento2').innerText = 'R$ '+fat.toFixed(2);
-  document.getElementById('custos2').innerText = 'R$ '+cus.toFixed(2);
-  document.getElementById('lucro2').innerText = 'R$ '+luc.toFixed(2);
+  fatEl = document.getElementById('fat'); if(fatEl) fatEl.innerText='R$ '+fat.toFixed(2);
+  cusEl = document.getElementById('cus'); if(cusEl) cusEl.innerText='R$ '+cus.toFixed(2);
+  lucEl = document.getElementById('luc'); if(lucEl) lucEl.innerText='R$ '+luc.toFixed(2);
 
   let meses = Array(12).fill(0);
   vendas.forEach(v=>meses[v.mes]+=v.valor);
   grafico.data.datasets[0].data = meses;
   grafico.update();
 
-  renderLista();
-}
-
-function renderLista() {
-  let filtro = document.getElementById('filtroMes').value;
-  let lista = document.getElementById('listaVendas');
-  lista.innerHTML='';
-
-  vendas.forEach((v,i)=>{
-    if(filtro!='todos' && v.mes != filtro) return;
-
-    let li = document.createElement('li');
-    li.innerHTML = `${v.cliente} | ${v.tipo} | R$${v.valor} | Lucro: R$${(v.valor-v.custo).toFixed(2)} 
-    <button class='delete-btn' onclick='excluirVenda(${i})'>X</button>`;
-    lista.appendChild(li);
-  });
-}
-
-let ctx = document.getElementById('grafico').getContext('2d');
-let grafico = new Chart(ctx, {
-  type:'bar',
-  data:{
-    labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
-    datasets:[{label:'Faturamento', data:Array(12).fill(0)}]
+  let lista = document.getElementById('lista'); if(lista){
+    lista.innerHTML='';
+    vendas.forEach((v,i)=>{
+      let li = document.createElement('li');
+      li.innerHTML = `${v.cliente} - R$${v.valor} <span class='tag ${v.status}'>${v.status}</span>`;
+      lista.appendChild(li);
+    });
   }
+}
+
+let grafico = new Chart(document.getElementById('grafico'),{
+  type:'bar',
+  data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[{label:'Faturamento',data:Array(12).fill(0)}]}
 });
 
 atualizar();
