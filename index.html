@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard V2</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { margin:0; font-family: Arial; display:flex; }
+    .sidebar { width:220px; background:#2f3b52; color:#fff; height:100vh; padding:15px; }
+    .menu-item { margin:10px 0; cursor:pointer; }
+    .content { flex:1; padding:20px; background:#f4f6f9; }
+    .card { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
+    button { padding:10px; margin-top:10px; }
+    input, select { padding:8px; margin:5px 0; width:100%; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Painel</h2>
+  <div class="menu-item" onclick="showTab('dashboard')">Dashboard</div>
+  <div class="menu-item" onclick="showTab('vendas')">Vendas</div>
+  <div class="menu-item" onclick="showTab('financeiro')">Financeiro</div>
+  <div class="menu-item" onclick="showTab('clientes')">Clientes</div>
+  <div class="menu-item" onclick="showTab('produtos')">Produtos</div>
+</div>
+
+<div class="content">
+
+  <div id="dashboard" class="tab">
+    <div class="card">
+      <h3>Faturamento por mês</h3>
+      <canvas id="grafico"></canvas>
+    </div>
+  </div>
+
+  <div id="vendas" class="tab" style="display:none">
+    <div class="card">
+      <h3>Registrar Venda</h3>
+      <input type="text" id="cliente" placeholder="Nome do cliente">
+      <select id="tipo">
+        <option value="Vinil">Adesivo Vinil</option>
+        <option value="Papel">Adesivo Papel</option>
+        <option value="Outro">Outro</option>
+      </select>
+      <input type="number" id="valorVenda" placeholder="Valor da venda">
+      <input type="number" id="custoVenda" placeholder="Custo do serviço">
+      <button onclick="salvarVenda()">Salvar</button>
+    </div>
+
+    <div class="card">
+      <h3>Histórico</h3>
+      <ul id="listaVendas"></ul>
+    </div>
+  </div>
+
+  <div id="financeiro" class="tab" style="display:none">
+    <div class="card">
+      <p><strong>Faturamento:</strong> <span id="faturamento"></span></p>
+      <p><strong>Custos:</strong> <span id="custos"></span></p>
+      <p><strong>Lucro:</strong> <span id="lucro"></span></p>
+    </div>
+  </div>
+
+  <div id="clientes" class="tab" style="display:none">
+    <div class="card"><h3>Clientes (em breve)</h3></div>
+  </div>
+
+  <div id="produtos" class="tab" style="display:none">
+    <div class="card"><h3>Produtos (em breve)</h3></div>
+  </div>
+
+</div>
+
+<script>
+let vendas = JSON.parse(localStorage.getItem('vendas')) || [];
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
+  document.getElementById(tab).style.display = 'block';
+}
+
+function salvarVenda() {
+  let cliente = document.getElementById('cliente').value;
+  let tipo = document.getElementById('tipo').value;
+  let valor = parseFloat(document.getElementById('valorVenda').value);
+  let custo = parseFloat(document.getElementById('custoVenda').value);
+
+  if(!valor || !custo) return;
+
+  let data = new Date();
+  let mes = data.getMonth();
+
+  vendas.push({ cliente, tipo, valor, custo, mes });
+  localStorage.setItem('vendas', JSON.stringify(vendas));
+
+  atualizar();
+}
+
+function atualizar() {
+  let faturamento = vendas.reduce((acc, v) => acc + v.valor, 0);
+  let custos = vendas.reduce((acc, v) => acc + v.custo, 0);
+  let lucro = faturamento - custos;
+
+  document.getElementById('faturamento').innerText = 'R$ ' + faturamento.toFixed(2);
+  document.getElementById('custos').innerText = 'R$ ' + custos.toFixed(2);
+  document.getElementById('lucro').innerText = 'R$ ' + lucro.toFixed(2);
+
+  let meses = Array(12).fill(0);
+  vendas.forEach(v => meses[v.mes] += v.valor);
+
+  grafico.data.datasets[0].data = meses;
+  grafico.update();
+
+  let lista = document.getElementById('listaVendas');
+  lista.innerHTML = '';
+  vendas.forEach(v => {
+    let li = document.createElement('li');
+    li.innerText = `${v.cliente} - ${v.tipo} | Venda: R$${v.valor} | Custo: R$${v.custo} | Lucro: R$${(v.valor - v.custo).toFixed(2)}`;
+    lista.appendChild(li);
+  });
+}
+
+let ctx = document.getElementById('grafico').getContext('2d');
+let grafico = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+    datasets: [{
+      label: 'Faturamento',
+      data: Array(12).fill(0)
+    }]
+  }
+});
+
+atualizar();
+</script>
+
+</body>
+</html>
