@@ -796,18 +796,63 @@ function calcAdesivo() {
   const qtd = parseInt(document.getElementById('orc-qtd').value) || 1;
   const preco = parseFloat(document.getElementById('orc-material').value) || 0;
   const temArte = document.getElementById('arte-sim').checked;
+
+  // Área
   const m2unit = (l / 100) * (a / 100);
   const m2total = m2unit * qtd;
-  const arte = temArte ? 30 : 0;
-  const totalUnit = (m2unit * preco) + arte;
-  const total = totalUnit * qtd;
+
+  // Custos base
+  const custoMaterial = m2unit * preco;
+  const custoProducao = 5;
+
+  const baseUnit = custoMaterial + custoProducao;
+
+  // Escala de arte PROFISSIONAL
+  let arte = 0;
+  if (temArte) {
+    if (baseUnit <= 100) arte = 30;
+    else if (baseUnit <= 200) arte = 25;
+    else if (baseUnit <= 300) arte = 20;
+    else if (baseUnit <= 400) arte = 15;
+    else if (baseUnit <= 500) arte = 10;
+    else arte = 5;
+  }
+
+  let totalUnit = baseUnit + arte;
+  let total = totalUnit * qtd;
+
+  // Proteção de margem
+  const margemMin = 0.4;
+  const custoEstimado = total * 0.6;
+  const margem = total > 0 ? (total - custoEstimado) / total : 0;
+
+  if (margem < margemMin) {
+    total = custoEstimado / (1 - margemMin);
+    totalUnit = total / qtd;
+  }
+
+  // Valor mínimo
+  const minimo = 30;
+  if (total < minimo) {
+    total = minimo;
+    totalUnit = total / qtd;
+  }
+
   ultimoOrcamento = total;
+
+  // UI
   document.getElementById('res-area').textContent = m2total.toFixed(2) + ' m²';
   document.getElementById('res-unit').textContent = fmt(totalUnit);
   document.getElementById('res-total').textContent = fmt(total);
-  const mat = document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
+
+  const mat = document.getElementById('orc-material')
+    .options[document.getElementById('orc-material').selectedIndex]
+    .text.split('—')[0].trim();
+
   document.getElementById('res-detalhe').textContent =
-    `${l}cm × ${a}cm × ${qtd} un. | ${mat}${temArte ? ' | Arte incluída' : ''}`;
+    `${l}cm × ${a}cm × ${qtd} un. | ${mat}` +
+    (temArte ? ` | Arte: R$ ${arte}` : '');
+
   document.getElementById('btn-converter').style.display = total > 0 ? 'block' : 'none';
 }
 
@@ -843,10 +888,10 @@ function calcFolha() {
   // A4 e A3: tamanho real menos 0.5cm de cada lado = -1cm em cada dimensão
   // SRA3: área de impressão já definida em 31x44cm (1cm de margem cada lado)
   const dims = {
-    a4:   [21 - 1,   29.7 - 1],
-    a3:   [29.7 - 1, 42 - 1  ],
-    sra3: [31,       44       ]
-  };
+  a4:   [20, 28.7],     // margem total 1cm
+  a3:   [28.7, 41],     // margem total 1cm
+  sra3: [31, 44]        // já com margem aplicada
+};
   const [fw, fh] = dims[folha];
 
   const iw = parseFloat(document.getElementById('folha-larg').value) || 0;
