@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de Gráfica</title>
+<title>Gráfica Master Print — Sistema</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -45,14 +45,19 @@
     overflow-y: auto;
   }
   .sidebar-logo {
-    padding: 20px 16px 16px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
+    padding: 16px 12px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
-    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .sidebar-logo span { color: var(--accent-blue); }
+  .sidebar-logo img {
+    width: 100%;
+    max-width: 168px;
+    height: auto;
+    mix-blend-mode: screen;
+    display: block;
+  }
   .sidebar nav { padding: 10px 0; flex: 1; }
   .nav-item {
     display: flex;
@@ -290,7 +295,9 @@
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="sidebar-logo">Gráfica <span>PRO</span></div>
+  <div class="sidebar-logo">
+    <img src="logo-branco.png" alt="Gráfica Master Print">
+  </div>
   <nav>
     <div class="nav-item active" onclick="setTab('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
     <div class="nav-item" onclick="setTab('vendas')"><span class="nav-icon">💰</span> Vendas</div>
@@ -306,7 +313,9 @@
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <span class="topbar-title" id="topbar-title">Painel inicial</span>
+    <span class="topbar-title" id="topbar-title">
+      <img src="logo-colorido.png" alt="Gráfica Master Print" style="height:36px;mix-blend-mode:screen;vertical-align:middle;">
+    </span>
     <div class="topbar-actions">
       <button class="btn btn-blue" onclick="openModal()">+ Nova Venda</button>
       <button class="btn btn-green" onclick="setTab('orcamento')">📋 Orçamento</button>
@@ -510,11 +519,10 @@
                 <div class="orc-label">Material</div>
                 <select id="orc-material" class="orc-input" onchange="calcAdesivo()">
                   <option value="90">Vinil — R$ 90/m²</option>
-                  <option value="60">Papel Comum — R$ 60/m²</option>
-                  <option value="120">Lona — R$ 120/m²</option>
-                  <option value="150">Adesivo Vinil — R$ 150/m²</option>
-                  <option value="200">Adesivo Espelhado — R$ 200/m²</option>
-                  <option value="180">Banner — R$ 180/m²</option>
+                  <option value="120">Vinil com laminação — R$ 120/m²</option>
+                  <option value="90">Lona — R$ 90/m²</option>
+                  <option value="30">Papel comum 75g — R$ 30/m²</option>
+                  <option value="50">Papel mate 108g — R$ 50/m²</option>
                 </select>
               </div>
 
@@ -826,22 +834,38 @@ function limparOrcamento() {
 
 function calcFolha() {
   const folha = document.querySelector('input[name="folha"]:checked').value;
-  const dims = { a4: [21, 29.7], a3: [29.7, 42], sra3: [32, 45] };
+  // Dimensões de impressão por folha:
+  // A4 e A3: tamanho real menos 0.5cm de cada lado = -1cm em cada dimensão
+  // SRA3: área de impressão já definida em 31x44cm (1cm de margem cada lado)
+  const dims = {
+    a4:   [21 - 1,   29.7 - 1],
+    a3:   [29.7 - 1, 42 - 1  ],
+    sra3: [31,       44       ]
+  };
   const [fw, fh] = dims[folha];
+
   const iw = parseFloat(document.getElementById('folha-larg').value) || 0;
   const ih = parseFloat(document.getElementById('folha-alt').value) || 0;
   const qtd = parseInt(document.getElementById('folha-qtd').value) || 0;
   if (!iw || !ih) return;
-  const porLarg = Math.floor(fw / iw);
-  const porAlt = Math.floor(fh / ih);
+
+  // Espaçamento de 0.15mm = 0.015cm entre cada item
+  const gap = 0.015;
+
+  // Quantos cabem: (área disponível + 1 gap) / (tamanho do item + gap)
+  const porLarg = Math.floor((fw + gap) / (iw + gap));
+  const porAlt  = Math.floor((fh + gap) / (ih + gap));
   const porFolha = porLarg * porAlt;
-  const folhasNec = porFolha > 0 ? Math.ceil(qtd / porFolha) : 0;
+  const folhasNec = porFolha > 0 && qtd > 0 ? Math.ceil(qtd / porFolha) : 0;
+
   document.getElementById('f-larg').textContent = porLarg;
   document.getElementById('f-alt').textContent = porAlt;
   document.getElementById('f-total').textContent = porFolha;
-  document.getElementById('f-folhas').textContent = folhasNec || '—';
+  document.getElementById('f-folhas').textContent = folhasNec || (qtd ? '—' : '0');
+
+  const nomesFolha = { a4: `A4 (área útil ${fw.toFixed(1)}×${fh.toFixed(1)}cm)`, a3: `A3 (área útil ${fw.toFixed(1)}×${fh.toFixed(1)}cm)`, sra3: `SRA3 (área útil 31×44cm)` };
   document.getElementById('f-detalhe').textContent =
-    `Folha ${folha.toUpperCase()} (${fw}×${fh}cm) | Item ${iw}×${ih}cm | ${porFolha} por folha${qtd ? ` | ${folhasNec} folha(s) para ${qtd} unidades` : ''}`;
+    `${nomesFolha[folha]} | Item ${iw}×${ih}cm + 0,15mm de espaçamento | ${porFolha} por folha${qtd ? ` | ${folhasNec} folha(s) para ${qtd} unidades` : ''}`;
 }
 
 function renderHistorico() {
