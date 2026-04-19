@@ -273,6 +273,13 @@
   .tab-content { display: none; }
   .tab-content.active { display: contents; }
 
+  .orc-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .orc-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font); font-size: 13px; background: #fff; }
+  .orc-input:focus { outline: none; border-color: var(--accent-blue); }
+  .res-box { background: var(--body-bg); border-radius: 8px; padding: 10px 12px; }
+  .res-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .res-val { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+
   scrollbar-width: thin;
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -449,35 +456,197 @@
   <!-- ORCAMENTO TAB -->
   <div id="tab-orcamento" class="tab-content">
     <div class="content">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        <div class="card">
-          <div class="card-header">📐 Gerar orçamento</div>
-          <div class="card-body">
-            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Largura (cm)</label>
-            <input id="largura" type="number" placeholder="ex: 100" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Altura (cm)</label>
-            <input id="altura" type="number" placeholder="ex: 50" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Material</label>
-            <select id="material" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;margin-bottom:14px;">
-              <option value="90">Vinil (R$ 90/m²)</option>
-              <option value="60">Papel Comum (R$ 60/m²)</option>
-              <option value="120">Lona (R$ 120/m²)</option>
-              <option value="150">Adesivo Vinil (R$ 150/m²)</option>
-            </select>
-            <button class="btn btn-blue" onclick="gerarOrcamento()" style="width:100%">Calcular orçamento</button>
-            <div class="orcamento-result" id="orcamento-result"></div>
-            <button class="btn btn-green" onclick="converterVenda()" id="btn-converter" style="width:100%;margin-top:10px;display:none">Converter em venda pendente</button>
+
+      <!-- SUB-TABS -->
+      <div style="display:flex;gap:6px;margin-bottom:4px;">
+        <button class="btn btn-blue" id="orc-tab-adesivo" onclick="setOrcTab('adesivo')" style="font-size:12px;">📐 Adesivo / Banner</button>
+        <button class="btn" id="orc-tab-folha" onclick="setOrcTab('folha')" style="font-size:12px;background:#e0e4ea;color:var(--text-primary);">🗂 Aproveitamento de Folha</button>
+        <button class="btn" id="orc-tab-hist" onclick="setOrcTab('hist')" style="font-size:12px;background:#e0e4ea;color:var(--text-primary);">📋 Histórico</button>
+      </div>
+
+      <!-- ADESIVO / BANNER -->
+      <div id="orc-adesivo">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+          <!-- FORMULÁRIO -->
+          <div class="card">
+            <div class="card-header">📐 Cálculo de adesivo / banner</div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div>
+                  <div class="orc-label">Nome do cliente</div>
+                  <input id="orc-cliente" placeholder="Ex: João Silva" class="orc-input">
+                </div>
+                <div>
+                  <div class="orc-label">Telefone</div>
+                  <input id="orc-tel" placeholder="(00) 00000-0000" class="orc-input">
+                </div>
+              </div>
+
+              <div>
+                <div class="orc-label">Vendedor</div>
+                <input id="orc-vendedor" placeholder="Nome do vendedor" class="orc-input">
+              </div>
+
+              <hr style="border:none;border-top:1px solid var(--border);">
+
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+                <div>
+                  <div class="orc-label">Largura (cm)</div>
+                  <input id="orc-largura" type="number" placeholder="ex: 100" class="orc-input" oninput="calcAdesivo()">
+                </div>
+                <div>
+                  <div class="orc-label">Altura (cm)</div>
+                  <input id="orc-altura" type="number" placeholder="ex: 50" class="orc-input" oninput="calcAdesivo()">
+                </div>
+                <div>
+                  <div class="orc-label">Quantidade</div>
+                  <input id="orc-qtd" type="number" placeholder="1" value="1" class="orc-input" oninput="calcAdesivo()">
+                </div>
+              </div>
+
+              <div>
+                <div class="orc-label">Material</div>
+                <select id="orc-material" class="orc-input" onchange="calcAdesivo()">
+                  <option value="90">Vinil — R$ 90/m²</option>
+                  <option value="60">Papel Comum — R$ 60/m²</option>
+                  <option value="120">Lona — R$ 120/m²</option>
+                  <option value="150">Adesivo Vinil — R$ 150/m²</option>
+                  <option value="200">Adesivo Espelhado — R$ 200/m²</option>
+                  <option value="180">Banner — R$ 180/m²</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="orc-label">Tem arte?</div>
+                <div style="display:flex;gap:8px;">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+                    <input type="radio" name="arte" value="sim" id="arte-sim" onchange="calcAdesivo()"> Sim (+R$ 30,00)
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+                    <input type="radio" name="arte" value="nao" id="arte-nao" checked onchange="calcAdesivo()"> Não
+                  </label>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:8px;margin-top:4px;">
+                <button class="btn btn-blue" onclick="salvarOrcamento()" style="flex:1">💾 Salvar orçamento</button>
+                <button class="btn" onclick="limparOrcamento()" style="background:#f0f2f5;color:var(--text-primary);">🗑 Limpar</button>
+              </div>
+              <button class="btn btn-green" onclick="orcToVenda()" id="btn-converter" style="width:100%;display:none;">➕ Converter em venda pendente</button>
+            </div>
           </div>
-        </div>
-        <div class="card">
-          <div class="card-header">📋 Histórico de orçamentos</div>
-          <div class="card-body">
-            <ul id="historico-orc" style="list-style:none;padding:0;font-size:13px;display:flex;flex-direction:column;gap:8px;">
-              <li style="color:var(--text-muted);text-align:center;padding:20px 0;">Nenhum orçamento gerado.</li>
-            </ul>
+
+          <!-- RESULTADO -->
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card">
+              <div class="card-header">📊 Resultado</div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:0;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+                  <div class="res-box">
+                    <div class="res-label">Área total</div>
+                    <div class="res-val" id="res-area">0,00 m²</div>
+                  </div>
+                  <div class="res-box">
+                    <div class="res-label">Valor unitário</div>
+                    <div class="res-val" id="res-unit">R$ 0,00</div>
+                  </div>
+                  <div class="res-box" style="background:var(--accent-blue);">
+                    <div class="res-label" style="color:rgba(255,255,255,0.75)">Total</div>
+                    <div class="res-val" id="res-total" style="color:#fff;font-size:20px;">R$ 0,00</div>
+                  </div>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;" id="res-detalhe">Preencha as medidas para ver o resultado.</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">📱 Ações rápidas</div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
+                <button class="btn" onclick="enviarWhatsapp()" style="background:#25d366;color:#fff;width:100%;">💬 Enviar por WhatsApp</button>
+                <button class="btn" onclick="gerarPDF()" style="background:#e74c3c;color:#fff;width:100%;">📄 Gerar PDF</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- APROVEITAMENTO DE FOLHA -->
+      <div id="orc-folha" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-header">🗂 Cálculo de aproveitamento de folha</div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+              <div>
+                <div class="orc-label">Tamanho da folha</div>
+                <div style="display:flex;gap:8px;">
+                  <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;"><input type="radio" name="folha" value="a4" checked onchange="calcFolha()"> A4 (21×29,7cm)</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;"><input type="radio" name="folha" value="a3" onchange="calcFolha()"> A3 (29,7×42cm)</label>
+                  <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;"><input type="radio" name="folha" value="sra3" onchange="calcFolha()"> SRA3 (32×45cm)</label>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div>
+                  <div class="orc-label">Largura do item (cm)</div>
+                  <input id="folha-larg" type="number" placeholder="ex: 9" class="orc-input" oninput="calcFolha()">
+                </div>
+                <div>
+                  <div class="orc-label">Altura do item (cm)</div>
+                  <input id="folha-alt" type="number" placeholder="ex: 5" class="orc-input" oninput="calcFolha()">
+                </div>
+              </div>
+              <div>
+                <div class="orc-label">Quantidade desejada</div>
+                <input id="folha-qtd" type="number" placeholder="ex: 100" class="orc-input" oninput="calcFolha()">
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">📊 Resultado de aproveitamento</div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+                <div class="res-box">
+                  <div class="res-label">Por largura</div>
+                  <div class="res-val" id="f-larg">0</div>
+                </div>
+                <div class="res-box">
+                  <div class="res-label">Por altura</div>
+                  <div class="res-val" id="f-alt">0</div>
+                </div>
+                <div class="res-box">
+                  <div class="res-label">Total por folha</div>
+                  <div class="res-val" id="f-total">0</div>
+                </div>
+                <div class="res-box" style="background:var(--accent-blue);">
+                  <div class="res-label" style="color:rgba(255,255,255,0.75)">Folhas necessárias</div>
+                  <div class="res-val" id="f-folhas" style="color:#fff;">0</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;" id="f-detalhe">Preencha as medidas para calcular.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div id="orc-hist" style="display:none;">
+        <div class="card">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>📋 Histórico de orçamentos</span>
+            <button class="btn" onclick="limparHistorico()" style="font-size:11px;padding:4px 10px;background:#fdecea;color:var(--accent-red);border-color:var(--accent-red);">Limpar tudo</button>
+          </div>
+          <div class="card-body">
+            <table class="vendas-table" id="hist-table">
+              <thead>
+                <tr><th>Data</th><th>Cliente</th><th>Material</th><th>Medidas</th><th>Qtd</th><th>Área</th><th>Total</th><th></th></tr>
+              </thead>
+              <tbody id="hist-tbody"></tbody>
+            </table>
+            <p id="hist-empty" style="text-align:center;color:var(--text-muted);font-size:13px;padding:24px 0;">Nenhum orçamento salvo ainda.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -596,51 +765,150 @@ function renderVendasTable() {
   });
 }
 
-function gerarOrcamento() {
-  const l = parseFloat(document.getElementById('largura').value) || 0;
-  const a = parseFloat(document.getElementById('altura').value) || 0;
-  const preco = parseFloat(document.getElementById('material').value);
-  const mat = document.getElementById('material').options[document.getElementById('material').selectedIndex].text;
-  const m2 = (l/100) * (a/100);
-  const total = m2 * preco;
+function setOrcTab(tab) {
+  ['adesivo','folha','hist'].forEach(t => {
+    document.getElementById('orc-' + t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('orc-tab-' + t);
+    if (btn) {
+      btn.style.background = t === tab ? 'var(--accent-blue)' : '#e0e4ea';
+      btn.style.color = t === tab ? '#fff' : 'var(--text-primary)';
+    }
+  });
+  if (tab === 'hist') renderHistorico();
+}
+
+function calcAdesivo() {
+  const l = parseFloat(document.getElementById('orc-largura').value) || 0;
+  const a = parseFloat(document.getElementById('orc-altura').value) || 0;
+  const qtd = parseInt(document.getElementById('orc-qtd').value) || 1;
+  const preco = parseFloat(document.getElementById('orc-material').value) || 0;
+  const temArte = document.getElementById('arte-sim').checked;
+  const m2unit = (l / 100) * (a / 100);
+  const m2total = m2unit * qtd;
+  const arte = temArte ? 30 : 0;
+  const totalUnit = (m2unit * preco) + arte;
+  const total = totalUnit * qtd;
   ultimoOrcamento = total;
+  document.getElementById('res-area').textContent = m2total.toFixed(2) + ' m²';
+  document.getElementById('res-unit').textContent = fmt(totalUnit);
+  document.getElementById('res-total').textContent = fmt(total);
+  const mat = document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
+  document.getElementById('res-detalhe').textContent =
+    `${l}cm × ${a}cm × ${qtd} un. | ${mat}${temArte ? ' | Arte incluída' : ''}`;
+  document.getElementById('btn-converter').style.display = total > 0 ? 'block' : 'none';
+}
 
-  const res = document.getElementById('orcamento-result');
-  res.style.display = 'block';
-  res.innerHTML = `Área: ${m2.toFixed(2)} m² &nbsp;|&nbsp; Material: ${mat.split('(')[0].trim()} &nbsp;|&nbsp; <strong>Total: ${fmt(total)}</strong>`;
-
-  document.getElementById('btn-converter').style.display = 'block';
-
-  const item = { mat: mat.split('(')[0].trim(), m2: m2.toFixed(2), total, data: new Date().toLocaleDateString('pt-BR') };
+function salvarOrcamento() {
+  const l = parseFloat(document.getElementById('orc-largura').value) || 0;
+  const a = parseFloat(document.getElementById('orc-altura').value) || 0;
+  const qtd = parseInt(document.getElementById('orc-qtd').value) || 1;
+  const mat = document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
+  const m2 = ((l/100)*(a/100)*qtd).toFixed(2);
+  const cliente = document.getElementById('orc-cliente').value || 'Sem nome';
+  if (!ultimoOrcamento) calcAdesivo();
+  const item = { data: new Date().toLocaleDateString('pt-BR'), cliente, mat, medidas: `${l}×${a}cm`, qtd, m2, total: ultimoOrcamento, id: Date.now() };
   historicoOrc.push(item);
+  localStorage.setItem('grafica_orc', JSON.stringify(historicoOrc));
+  alert('Orçamento salvo!');
+}
+
+function limparOrcamento() {
+  ['orc-cliente','orc-tel','orc-vendedor','orc-largura','orc-altura'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('orc-qtd').value = 1;
+  document.getElementById('arte-nao').checked = true;
+  document.getElementById('res-area').textContent = '0,00 m²';
+  document.getElementById('res-unit').textContent = 'R$ 0,00';
+  document.getElementById('res-total').textContent = 'R$ 0,00';
+  document.getElementById('res-detalhe').textContent = 'Preencha as medidas para ver o resultado.';
+  document.getElementById('btn-converter').style.display = 'none';
+  ultimoOrcamento = null;
+}
+
+function calcFolha() {
+  const folha = document.querySelector('input[name="folha"]:checked').value;
+  const dims = { a4: [21, 29.7], a3: [29.7, 42], sra3: [32, 45] };
+  const [fw, fh] = dims[folha];
+  const iw = parseFloat(document.getElementById('folha-larg').value) || 0;
+  const ih = parseFloat(document.getElementById('folha-alt').value) || 0;
+  const qtd = parseInt(document.getElementById('folha-qtd').value) || 0;
+  if (!iw || !ih) return;
+  const porLarg = Math.floor(fw / iw);
+  const porAlt = Math.floor(fh / ih);
+  const porFolha = porLarg * porAlt;
+  const folhasNec = porFolha > 0 ? Math.ceil(qtd / porFolha) : 0;
+  document.getElementById('f-larg').textContent = porLarg;
+  document.getElementById('f-alt').textContent = porAlt;
+  document.getElementById('f-total').textContent = porFolha;
+  document.getElementById('f-folhas').textContent = folhasNec || '—';
+  document.getElementById('f-detalhe').textContent =
+    `Folha ${folha.toUpperCase()} (${fw}×${fh}cm) | Item ${iw}×${ih}cm | ${porFolha} por folha${qtd ? ` | ${folhasNec} folha(s) para ${qtd} unidades` : ''}`;
+}
+
+function renderHistorico() {
+  const tbody = document.getElementById('hist-tbody');
+  const empty = document.getElementById('hist-empty');
+  tbody.innerHTML = '';
+  if (!historicoOrc.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  historicoOrc.slice().reverse().forEach(h => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${h.data}</td><td>${h.cliente}</td><td>${h.mat}</td><td>${h.medidas}</td><td>${h.qtd}</td><td>${h.m2} m²</td><td style="font-weight:500;color:var(--accent-blue)">${fmt(h.total)}</td><td><button class="del-btn" onclick="excluirOrc(${h.id})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function excluirOrc(id) {
+  historicoOrc = historicoOrc.filter(h => h.id !== id);
   localStorage.setItem('grafica_orc', JSON.stringify(historicoOrc));
   renderHistorico();
 }
 
-function renderHistorico() {
-  const ul = document.getElementById('historico-orc');
-  if (!historicoOrc.length) return;
-  ul.innerHTML = '';
-  historicoOrc.slice().reverse().slice(0,8).forEach(h => {
-    const li = document.createElement('li');
-    li.style.cssText = 'padding:8px 10px;background:#f8f9fb;border-radius:6px;display:flex;justify-content:space-between;';
-    li.innerHTML = `<span>${h.mat} — ${h.m2} m²</span><span style="font-weight:500;color:var(--accent-blue)">${fmt(h.total)}</span>`;
-    ul.appendChild(li);
-  });
+function limparHistorico() {
+  if (!confirm('Apagar todo o histórico de orçamentos?')) return;
+  historicoOrc = [];
+  localStorage.setItem('grafica_orc', JSON.stringify(historicoOrc));
+  renderHistorico();
 }
 
-function converterVenda() {
+function enviarWhatsapp() {
+  const cliente = document.getElementById('orc-cliente').value || 'cliente';
+  const tel = document.getElementById('orc-tel').value.replace(/\D/g,'');
+  const l = document.getElementById('orc-largura').value || '?';
+  const a = document.getElementById('orc-altura').value || '?';
+  const qtd = document.getElementById('orc-qtd').value || 1;
+  const mat = document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
+  const total = ultimoOrcamento ? fmt(ultimoOrcamento) : 'R$ 0,00';
+  const msg = encodeURIComponent(`Olá ${cliente}! Segue seu orçamento:\n\nMaterial: ${mat}\nMedidas: ${l}cm × ${a}cm\nQuantidade: ${qtd}\nTotal: ${total}\n\nObrigado pela preferência!`);
+  const url = tel ? `https://wa.me/55${tel}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  window.open(url, '_blank');
+}
+
+function gerarPDF() {
+  const cliente = document.getElementById('orc-cliente').value || 'Cliente';
+  const tel = document.getElementById('orc-tel').value || '—';
+  const vendedor = document.getElementById('orc-vendedor').value || '—';
+  const l = document.getElementById('orc-largura').value || '0';
+  const a = document.getElementById('orc-altura').value || '0';
+  const qtd = document.getElementById('orc-qtd').value || '1';
+  const mat = document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
+  const total = ultimoOrcamento ? fmt(ultimoOrcamento) : 'R$ 0,00';
+  const unit = ultimoOrcamento ? fmt(ultimoOrcamento / (parseInt(qtd)||1)) : 'R$ 0,00';
+  const area = ((parseFloat(l)/100)*(parseFloat(a)/100)*(parseInt(qtd)||1)).toFixed(2);
+  const data = new Date().toLocaleDateString('pt-BR');
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Orçamento</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#333}h1{color:#2980b9;font-size:22px;margin-bottom:4px}.sub{color:#999;font-size:13px;margin-bottom:24px}table{width:100%;border-collapse:collapse;margin:16px 0}td,th{padding:9px 12px;border:1px solid #e0e4ea;font-size:13px}th{background:#f0f2f5;font-weight:600}.total{font-size:18px;font-weight:700;color:#2980b9}.footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center}</style></head><body><h1>Orçamento — Gráfica Master Print</h1><div class="sub">Emitido em ${data}</div><table><tr><th>Cliente</th><td>${cliente}</td><th>Telefone</th><td>${tel}</td></tr><tr><th>Vendedor</th><td>${vendedor}</td><th>Data</th><td>${data}</td></tr></table><table><tr><th>Material</th><th>Medidas</th><th>Qtd</th><th>Área</th><th>Unitário</th><th>Total</th></tr><tr><td>${mat}</td><td>${l}×${a}cm</td><td>${qtd}</td><td>${area} m²</td><td>${unit}</td><td class="total">${total}</td></tr></table><div class="footer">Obrigado pela preferência! Este orçamento é válido por 7 dias.</div></body></html>`;
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.print();
+}
+
+function orcToVenda() {
   if (!ultimoOrcamento) return;
-  vendas.push({
-    cliente: 'Orçamento',
-    valor: ultimoOrcamento,
-    custo: ultimoOrcamento * 0.6,
-    status: 'pendente',
-    mes: new Date().getMonth(),
-    id: Date.now()
-  });
+  const cliente = document.getElementById('orc-cliente').value || 'Orçamento';
+  vendas.push({ cliente, valor: ultimoOrcamento, custo: ultimoOrcamento * 0.6, status: 'pendente', mes: new Date().getMonth(), id: Date.now() });
   save();
   atualizar();
+  alert('Venda criada como pendente!');
   setTab('vendas');
 }
 
@@ -726,7 +994,6 @@ function atualizar() {
   }
 }
 
-renderHistorico();
 atualizar();
 </script>
 </body>
