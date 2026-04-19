@@ -1,164 +1,733 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard V4</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: Arial; display:flex; background:#eef1f5; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Gráfica</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .sidebar { width:240px; background:#2f3b52; color:#fff; height:100vh; padding:20px; }
-    .menu-item { padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; }
-    .menu-item:hover { background:#3f4d6b; }
+  :root {
+    --sidebar-bg: #1e2a38;
+    --sidebar-hover: #2c3e52;
+    --sidebar-active: #2980b9;
+    --topbar-bg: #2c3e52;
+    --body-bg: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-primary: #2c3e50;
+    --text-muted: #7f8c8d;
+    --accent-blue: #2980b9;
+    --accent-green: #27ae60;
+    --accent-red: #e74c3c;
+    --accent-orange: #e67e22;
+    --border: #e0e4ea;
+    --font: 'Sora', sans-serif;
+  }
 
-    .main { flex:1; display:flex; flex-direction:column; }
-    .topbar { background:#fff; padding:15px 20px; border-bottom:1px solid #ddd; }
-    .content { padding:20px; }
+  body {
+    font-family: var(--font);
+    background: var(--body-bg);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px; }
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 20px 16px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    letter-spacing: 0.3px;
+  }
+  .sidebar-logo span { color: var(--accent-blue); }
+  .sidebar nav { padding: 10px 0; flex: 1; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+  .nav-item.active { background: var(--sidebar-hover); color: #fff; border-left-color: var(--accent-blue); }
+  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
 
-    .card { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
-    .green { border-left:5px solid #28a745; }
-    .red { border-left:5px solid #dc3545; }
-    .blue { border-left:5px solid #007bff; }
+  /* MAIN */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .topbar {
+    background: var(--topbar-bg);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-title { color: #fff; font-size: 15px; font-weight: 500; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: none;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-green { background: var(--accent-green); color: #fff; }
+  .btn-blue { background: var(--accent-blue); color: #fff; }
 
-    input, select { width:100%; padding:8px; margin:5px 0; }
-    button { padding:10px; border:none; border-radius:8px; background:#007bff; color:#fff; cursor:pointer; }
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-    ul { list-style:none; padding:0; }
-    li { background:#f9f9f9; padding:10px; margin-bottom:8px; border-radius:8px; display:flex; justify-content:space-between; }
+  /* SUMMARY CARDS */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .summary-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .summary-card-body {
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .summary-card-info h4 { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-bottom: 3px; }
+  .summary-card-info .value { font-size: 22px; font-weight: 600; }
+  .summary-card-info .subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .summary-icon {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    opacity: 0.2;
+  }
+  .summary-card-footer {
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+  }
+  .green-footer { background: var(--accent-green); color: #fff; }
+  .red-footer { background: var(--accent-red); color: #fff; }
 
-    .tag { padding:3px 8px; border-radius:6px; font-size:12px; }
-    .pago { background:#28a745; color:#fff; }
-    .pendente { background:#ffc107; }
-  </style>
+  /* MIDDLE ROW */
+  .middle-row {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+  }
+
+  /* AVISOS */
+  .card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--topbar-bg);
+    padding: 10px 14px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-body { padding: 14px; }
+
+  .aviso-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+  .aviso-item:last-child { border-bottom: none; }
+  .aviso-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .aviso-item a { color: var(--accent-blue); text-decoration: none; font-weight: 500; }
+
+  /* CHART ROW */
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+  }
+  .chart-wrap { position: relative; height: 220px; }
+
+  /* RESULTADO */
+  .resultado-table { width: 100%; border-collapse: collapse; }
+  .resultado-table tr td { padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--border); }
+  .resultado-table tr:last-child td { border-bottom: none; }
+  .resultado-table .label { color: var(--text-muted); }
+  .resultado-table .value-col { text-align: right; font-weight: 500; }
+  .resultado-table .highlight td { font-weight: 600; font-size: 13px; }
+  .resultado-table .positive { color: var(--accent-green); }
+  .resultado-table .negative { color: var(--accent-red); }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 10px;
+    padding: 24px;
+    width: 360px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  }
+  .modal h3 { font-size: 15px; margin-bottom: 16px; }
+  .modal label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 3px; margin-top: 10px; }
+  .modal input, .modal select {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 6px; font-family: var(--font); font-size: 13px;
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+  .btn-cancel { background: #f0f2f5; color: var(--text-primary); }
+
+  /* VENDAS TABLE */
+  .vendas-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .vendas-table th { text-align: left; padding: 8px 10px; color: var(--text-muted); font-weight: 500; border-bottom: 2px solid var(--border); }
+  .vendas-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+  .vendas-table tr:last-child td { border-bottom: none; }
+  .tag {
+    padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+    display: inline-block;
+  }
+  .tag.pago { background: #eafaf1; color: #1e8449; }
+  .tag.pendente { background: #fef9e7; color: #b7770d; }
+  .del-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--accent-red); font-size: 13px; padding: 2px 6px;
+    border-radius: 4px; transition: background 0.1s;
+  }
+  .del-btn:hover { background: #fdecea; }
+
+  /* ORCAMENTO */
+  .orcamento-result {
+    margin-top: 14px; padding: 12px 14px;
+    background: #eaf4fb; border-radius: 8px;
+    font-size: 13px; color: var(--accent-blue);
+    font-weight: 600; display: none;
+  }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; padding: 12px 20px 0; background: var(--topbar-bg); }
+  .tab-btn {
+    padding: 7px 16px; border-radius: 6px 6px 0 0;
+    border: none; font-family: var(--font); font-size: 12.5px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.65);
+  }
+  .tab-btn.active { background: var(--body-bg); color: var(--text-primary); }
+  .tab-content { display: none; }
+  .tab-content.active { display: contents; }
+
+  scrollbar-width: thin;
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+</style>
 </head>
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>Painel</h2>
-  <div class="menu-item" onclick="showTab('dashboard')">Dashboard</div>
-  <div class="menu-item" onclick="showTab('vendas')">Vendas</div>
-  <div class="menu-item" onclick="showTab('orcamento')">Orçamento</div>
+  <div class="sidebar-logo">Gráfica <span>PRO</span></div>
+  <nav>
+    <div class="nav-item active" onclick="setTab('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="setTab('vendas')"><span class="nav-icon">💰</span> Vendas</div>
+    <div class="nav-item" onclick="setTab('orcamento')"><span class="nav-icon">📋</span> Orçamento</div>
+    <div class="nav-item"><span class="nav-icon">👥</span> Clientes</div>
+    <div class="nav-item"><span class="nav-icon">📦</span> Produtos</div>
+    <div class="nav-item"><span class="nav-icon">📄</span> NF-e / Fiscal</div>
+    <div class="nav-item"><span class="nav-icon">📈</span> Relatórios</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Configurações</div>
+  </nav>
 </div>
 
+<!-- MAIN -->
 <div class="main">
-  <div class="topbar"><strong>Painel V4</strong></div>
-
-  <div class="content">
-
-    <div id="dashboard" class="tab">
-      <div class="grid">
-        <div class="card green"><h4>Faturamento</h4><p id="fat"></p></div>
-        <div class="card red"><h4>Custos</h4><p id="cus"></p></div>
-        <div class="card blue"><h4>Lucro</h4><p id="luc"></p></div>
-      </div>
-      <div class="card"><canvas id="grafico"></canvas></div>
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Painel inicial</span>
+    <div class="topbar-actions">
+      <button class="btn btn-blue" onclick="openModal()">+ Nova Venda</button>
+      <button class="btn btn-green" onclick="setTab('orcamento')">📋 Orçamento</button>
     </div>
+  </div>
 
-    <div id="vendas" class="tab" style="display:none">
-      <div class="card">
-        <h3>Registrar Venda</h3>
-        <input id="cliente" placeholder="Cliente">
-        <input id="valor" type="number" placeholder="Valor">
-        <input id="custo" type="number" placeholder="Custo">
-        <select id="status">
-          <option value="pago">Pago</option>
-          <option value="pendente">Pendente</option>
-        </select>
-        <button onclick="salvarVenda()">Salvar</button>
+  <!-- DASHBOARD TAB -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="content">
+
+      <!-- SUMMARY CARDS -->
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-card-body">
+            <div class="summary-card-info">
+              <h4>Faturamento total</h4>
+              <div class="value" id="fat">R$ 0,00</div>
+              <div class="subtitle">Total de vendas</div>
+            </div>
+            <div class="summary-icon" style="background: var(--accent-blue)">💵</div>
+          </div>
+          <div class="summary-card-footer green-footer">Ver detalhes »</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-body">
+            <div class="summary-card-info">
+              <h4>Custos totais</h4>
+              <div class="value" id="cus">R$ 0,00</div>
+              <div class="subtitle">Custo acumulado</div>
+            </div>
+            <div class="summary-icon" style="background: var(--accent-red)">📉</div>
+          </div>
+          <div class="summary-card-footer red-footer">Ver detalhes »</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-body">
+            <div class="summary-card-info">
+              <h4>Lucro líquido</h4>
+              <div class="value" id="luc">R$ 0,00</div>
+              <div class="subtitle">Faturamento - Custos</div>
+            </div>
+            <div class="summary-icon" style="background: var(--accent-green)">📈</div>
+          </div>
+          <div class="summary-card-footer green-footer">Ver detalhes »</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-body">
+            <div class="summary-card-info">
+              <h4>Total de vendas</h4>
+              <div class="value" id="totalVendas">0</div>
+              <div class="subtitle">Registros no sistema</div>
+            </div>
+            <div class="summary-icon" style="background: var(--accent-orange)">🛒</div>
+          </div>
+          <div class="summary-card-footer" style="background: var(--accent-orange); color:#fff;" onclick="setTab('vendas')">Ver vendas »</div>
+        </div>
       </div>
 
+      <!-- AVISOS + PIZZA -->
+      <div class="middle-row">
+        <div class="card">
+          <div class="card-header">📋 Quadro de avisos</div>
+          <div class="card-body" id="avisos">
+            <div class="aviso-item"><div class="aviso-dot" style="background:var(--accent-orange)"></div><span>Nenhum aviso no momento.</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">🥧 Vendas por status</div>
+          <div class="card-body">
+            <div class="chart-wrap" style="height:160px;">
+              <canvas id="pizzaChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRAFICO BARRAS + RESULTADO -->
+      <div class="chart-row">
+        <div class="card">
+          <div class="card-header">📊 Vendas por mês</div>
+          <div class="card-body">
+            <div class="chart-wrap">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">💼 Resultado consolidado</div>
+          <div class="card-body">
+            <table class="resultado-table">
+              <tr><td class="label">+ Receita bruta</td><td class="value-col" id="r-bruta">R$ 0,00</td></tr>
+              <tr><td class="label">- Custos (CMV)</td><td class="value-col negative" id="r-custos">R$ 0,00</td></tr>
+              <tr class="highlight"><td class="label">= Lucro operacional</td><td class="value-col" id="r-lucro">R$ 0,00</td></tr>
+              <tr><td class="label">Margem de lucro</td><td class="value-col" id="r-margem">0%</td></tr>
+              <tr><td class="label">Vendas pagas</td><td class="value-col positive" id="r-pagas">0</td></tr>
+              <tr><td class="label">Vendas pendentes</td><td class="value-col" style="color:var(--accent-orange)" id="r-pendentes">0</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VENDAS TAB -->
+  <div id="tab-vendas" class="tab-content">
+    <div class="content">
       <div class="card">
-        <h3>Vendas</h3>
-        <ul id="lista"></ul>
+        <div class="card-header">💰 Registro de vendas</div>
+        <div class="card-body">
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:16px;">
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Cliente</label>
+              <input id="cliente" placeholder="Nome do cliente" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Valor (R$)</label>
+              <input id="valor" type="number" placeholder="0,00" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Custo (R$)</label>
+              <input id="custo" type="number" placeholder="0,00" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Status</label>
+              <select id="statusVenda" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;">
+                <option value="pago">Pago</option>
+                <option value="pendente">Pendente</option>
+              </select>
+            </div>
+            <button class="btn btn-blue" onclick="salvarVenda()" style="height:36px;white-space:nowrap">Registrar</button>
+          </div>
+          <table class="vendas-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Cliente</th><th>Valor</th><th>Custo</th><th>Lucro</th><th>Status</th><th>Mês</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="vendas-tbody"></tbody>
+          </table>
+          <p id="empty-vendas" style="text-align:center;color:var(--text-muted);font-size:13px;padding:24px 0;">Nenhuma venda registrada ainda.</p>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div id="orcamento" class="tab" style="display:none">
-      <div class="card">
-        <h3>Gerar Orçamento</h3>
-        <input id="largura" type="number" placeholder="Largura (cm)">
-        <input id="altura" type="number" placeholder="Altura (cm)">
-        <select id="material">
-          <option value="90">Vinil (R$90/m²)</option>
-          <option value="60">Papel (R$60/m²)</option>
-        </select>
-        <button onclick="gerarOrcamento()">Calcular</button>
-        <p id="resultado"></p>
-        <button onclick="converterVenda()">Converter em venda</button>
+  <!-- ORCAMENTO TAB -->
+  <div id="tab-orcamento" class="tab-content">
+    <div class="content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="card">
+          <div class="card-header">📐 Gerar orçamento</div>
+          <div class="card-body">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Largura (cm)</label>
+            <input id="largura" type="number" placeholder="ex: 100" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Altura (cm)</label>
+            <input id="altura" type="number" placeholder="ex: 50" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">Material</label>
+            <select id="material" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;margin-bottom:14px;">
+              <option value="90">Vinil (R$ 90/m²)</option>
+              <option value="60">Papel Comum (R$ 60/m²)</option>
+              <option value="120">Lona (R$ 120/m²)</option>
+              <option value="150">Adesivo Vinil (R$ 150/m²)</option>
+            </select>
+            <button class="btn btn-blue" onclick="gerarOrcamento()" style="width:100%">Calcular orçamento</button>
+            <div class="orcamento-result" id="orcamento-result"></div>
+            <button class="btn btn-green" onclick="converterVenda()" id="btn-converter" style="width:100%;margin-top:10px;display:none">Converter em venda pendente</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">📋 Histórico de orçamentos</div>
+          <div class="card-body">
+            <ul id="historico-orc" style="list-style:none;padding:0;font-size:13px;display:flex;flex-direction:column;gap:8px;">
+              <li style="color:var(--text-muted);text-align:center;padding:20px 0;">Nenhum orçamento gerado.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- MODAL NOVA VENDA -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Nova venda rápida</h3>
+    <label>Cliente</label>
+    <input id="m-cliente" placeholder="Nome do cliente">
+    <label>Valor (R$)</label>
+    <input id="m-valor" type="number" placeholder="0,00">
+    <label>Custo (R$)</label>
+    <input id="m-custo" type="number" placeholder="0,00">
+    <label>Status</label>
+    <select id="m-status">
+      <option value="pago">Pago</option>
+      <option value="pendente">Pendente</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-blue" onclick="salvarVendaModal()">Salvar venda</button>
+    </div>
   </div>
 </div>
 
 <script>
-let vendas = JSON.parse(localStorage.getItem('vendas')) || [];
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+let vendas = JSON.parse(localStorage.getItem('grafica_vendas')) || [];
 let ultimoOrcamento = null;
+let historicoOrc = JSON.parse(localStorage.getItem('grafica_orc')) || [];
 
-function showTab(tab){ document.querySelectorAll('.tab').forEach(t=>t.style.display='none'); document.getElementById(tab).style.display='block'; }
+let barChart, pizzaChart;
 
-function salvarVenda(){
-  let v = {
-    cliente: cliente.value,
-    valor: parseFloat(valor.value),
-    custo: parseFloat(custo.value),
-    status: status.value,
-    mes: new Date().getMonth()
+function fmt(v) {
+  return 'R$ ' + parseFloat(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function setTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const titles = {dashboard:'Painel inicial', vendas:'Vendas', orcamento:'Orçamento'};
+  document.getElementById('topbar-title').textContent = titles[tab] || 'Painel';
+  if (tab === 'dashboard') atualizar();
+  if (tab === 'vendas') renderVendasTable();
+}
+
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function salvarVendaModal() {
+  const v = {
+    cliente: document.getElementById('m-cliente').value || 'Cliente',
+    valor: parseFloat(document.getElementById('m-valor').value) || 0,
+    custo: parseFloat(document.getElementById('m-custo').value) || 0,
+    status: document.getElementById('m-status').value,
+    mes: new Date().getMonth(),
+    id: Date.now()
   };
   vendas.push(v);
-  localStorage.setItem('vendas', JSON.stringify(vendas));
+  save();
+  closeModal();
   atualizar();
 }
 
-function gerarOrcamento(){
-  let m2 = (largura.value/100)*(altura.value/100);
-  let preco = m2 * material.value;
-  ultimoOrcamento = preco;
-  resultado.innerText = 'Valor: R$ ' + preco.toFixed(2);
+function salvarVenda() {
+  const v = {
+    cliente: document.getElementById('cliente').value || 'Cliente',
+    valor: parseFloat(document.getElementById('valor').value) || 0,
+    custo: parseFloat(document.getElementById('custo').value) || 0,
+    status: document.getElementById('statusVenda').value,
+    mes: new Date().getMonth(),
+    id: Date.now()
+  };
+  vendas.push(v);
+  save();
+  renderVendasTable();
+  atualizar();
+  document.getElementById('cliente').value = '';
+  document.getElementById('valor').value = '';
+  document.getElementById('custo').value = '';
 }
 
-function converterVenda(){
-  if(!ultimoOrcamento) return;
-  vendas.push({cliente:'Orçamento', valor:ultimoOrcamento, custo:ultimoOrcamento*0.6, status:'pendente', mes:new Date().getMonth()});
-  localStorage.setItem('vendas', JSON.stringify(vendas));
+function excluirVenda(id) {
+  vendas = vendas.filter(v => v.id !== id);
+  save();
+  renderVendasTable();
   atualizar();
 }
 
-function atualizar(){
-  let fat = vendas.reduce((a,v)=>a+v.valor,0);
-  let cus = vendas.reduce((a,v)=>a+v.custo,0);
-  let luc = fat-cus;
+function save() {
+  localStorage.setItem('grafica_vendas', JSON.stringify(vendas));
+}
 
-  fatEl = document.getElementById('fat'); if(fatEl) fatEl.innerText='R$ '+fat.toFixed(2);
-  cusEl = document.getElementById('cus'); if(cusEl) cusEl.innerText='R$ '+cus.toFixed(2);
-  lucEl = document.getElementById('luc'); if(lucEl) lucEl.innerText='R$ '+luc.toFixed(2);
+function renderVendasTable() {
+  const tbody = document.getElementById('vendas-tbody');
+  const empty = document.getElementById('empty-vendas');
+  tbody.innerHTML = '';
+  if (!vendas.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  vendas.slice().reverse().forEach((v, i) => {
+    const lucro = v.valor - v.custo;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text-muted)">${vendas.length - i}</td>
+      <td>${v.cliente}</td>
+      <td>${fmt(v.valor)}</td>
+      <td>${fmt(v.custo)}</td>
+      <td style="color:${lucro>=0?'var(--accent-green)':'var(--accent-red)'}">${fmt(lucro)}</td>
+      <td><span class="tag ${v.status}">${v.status}</span></td>
+      <td>${MESES[v.mes]}</td>
+      <td><button class="del-btn" onclick="excluirVenda(${v.id})">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-  let meses = Array(12).fill(0);
-  vendas.forEach(v=>meses[v.mes]+=v.valor);
-  grafico.data.datasets[0].data = meses;
-  grafico.update();
+function gerarOrcamento() {
+  const l = parseFloat(document.getElementById('largura').value) || 0;
+  const a = parseFloat(document.getElementById('altura').value) || 0;
+  const preco = parseFloat(document.getElementById('material').value);
+  const mat = document.getElementById('material').options[document.getElementById('material').selectedIndex].text;
+  const m2 = (l/100) * (a/100);
+  const total = m2 * preco;
+  ultimoOrcamento = total;
 
-  let lista = document.getElementById('lista'); if(lista){
-    lista.innerHTML='';
-    vendas.forEach((v,i)=>{
-      let li = document.createElement('li');
-      li.innerHTML = `${v.cliente} - R$${v.valor} <span class='tag ${v.status}'>${v.status}</span>`;
-      lista.appendChild(li);
+  const res = document.getElementById('orcamento-result');
+  res.style.display = 'block';
+  res.innerHTML = `Área: ${m2.toFixed(2)} m² &nbsp;|&nbsp; Material: ${mat.split('(')[0].trim()} &nbsp;|&nbsp; <strong>Total: ${fmt(total)}</strong>`;
+
+  document.getElementById('btn-converter').style.display = 'block';
+
+  const item = { mat: mat.split('(')[0].trim(), m2: m2.toFixed(2), total, data: new Date().toLocaleDateString('pt-BR') };
+  historicoOrc.push(item);
+  localStorage.setItem('grafica_orc', JSON.stringify(historicoOrc));
+  renderHistorico();
+}
+
+function renderHistorico() {
+  const ul = document.getElementById('historico-orc');
+  if (!historicoOrc.length) return;
+  ul.innerHTML = '';
+  historicoOrc.slice().reverse().slice(0,8).forEach(h => {
+    const li = document.createElement('li');
+    li.style.cssText = 'padding:8px 10px;background:#f8f9fb;border-radius:6px;display:flex;justify-content:space-between;';
+    li.innerHTML = `<span>${h.mat} — ${h.m2} m²</span><span style="font-weight:500;color:var(--accent-blue)">${fmt(h.total)}</span>`;
+    ul.appendChild(li);
+  });
+}
+
+function converterVenda() {
+  if (!ultimoOrcamento) return;
+  vendas.push({
+    cliente: 'Orçamento',
+    valor: ultimoOrcamento,
+    custo: ultimoOrcamento * 0.6,
+    status: 'pendente',
+    mes: new Date().getMonth(),
+    id: Date.now()
+  });
+  save();
+  atualizar();
+  setTab('vendas');
+}
+
+function atualizar() {
+  const fat = vendas.reduce((a,v) => a+v.valor, 0);
+  const cus = vendas.reduce((a,v) => a+v.custo, 0);
+  const luc = fat - cus;
+  const pagas = vendas.filter(v => v.status === 'pago').length;
+  const pendentes = vendas.filter(v => v.status === 'pendente').length;
+  const margem = fat > 0 ? ((luc/fat)*100).toFixed(1) : 0;
+
+  document.getElementById('fat').textContent = fmt(fat);
+  document.getElementById('cus').textContent = fmt(cus);
+  document.getElementById('luc').textContent = fmt(luc);
+  document.getElementById('luc').style.color = luc >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+  document.getElementById('totalVendas').textContent = vendas.length;
+  document.getElementById('r-bruta').textContent = fmt(fat);
+  document.getElementById('r-custos').textContent = fmt(cus);
+  document.getElementById('r-lucro').textContent = fmt(luc);
+  document.getElementById('r-lucro').className = 'value-col ' + (luc >= 0 ? 'positive' : 'negative');
+  document.getElementById('r-margem').textContent = margem + '%';
+  document.getElementById('r-pagas').textContent = pagas;
+  document.getElementById('r-pendentes').textContent = pendentes;
+
+  // Avisos
+  const avisos = document.getElementById('avisos');
+  avisos.innerHTML = '';
+  if (pendentes > 0) {
+    const valPend = vendas.filter(v=>v.status==='pendente').reduce((a,v)=>a+v.valor,0);
+    avisos.innerHTML += `<div class="aviso-item"><div class="aviso-dot" style="background:var(--accent-orange)"></div><span>Há <strong>${pendentes} venda(s) pendente(s)</strong>. Total: <strong>${fmt(valPend)}</strong></span></div>`;
+  }
+  if (luc < 0) {
+    avisos.innerHTML += `<div class="aviso-item"><div class="aviso-dot" style="background:var(--accent-red)"></div><span>Atenção: lucro operacional <strong>negativo</strong> (${fmt(luc)})</span></div>`;
+  }
+  if (!avisos.innerHTML) {
+    avisos.innerHTML = `<div class="aviso-item"><div class="aviso-dot" style="background:var(--accent-green)"></div><span>Nenhum aviso. Tudo certo!</span></div>`;
+  }
+
+  // Gráfico de barras
+  const meses = Array(12).fill(0);
+  vendas.forEach(v => meses[v.mes] += v.valor);
+
+  if (barChart) {
+    barChart.data.datasets[0].data = meses;
+    barChart.update();
+  } else {
+    barChart = new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: MESES,
+        datasets: [{
+          label: 'Faturamento',
+          data: meses,
+          backgroundColor: '#2980b9',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { font: { family: 'Sora', size: 11 } } }, x: { grid: { display: false }, ticks: { font: { family: 'Sora', size: 11 } } } }
+      }
+    });
+  }
+
+  // Pizza
+  if (pizzaChart) {
+    pizzaChart.data.datasets[0].data = [pagas, pendentes];
+    pizzaChart.update();
+  } else {
+    pizzaChart = new Chart(document.getElementById('pizzaChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Pagas', 'Pendentes'],
+        datasets: [{ data: [pagas, pendentes], backgroundColor: ['#27ae60','#e67e22'], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Sora', size: 11 }, padding: 12 } } },
+        cutout: '60%'
+      }
     });
   }
 }
 
-let grafico = new Chart(document.getElementById('grafico'),{
-  type:'bar',
-  data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[{label:'Faturamento',data:Array(12).fill(0)}]}
-});
-
+renderHistorico();
 atualizar();
 </script>
-
 </body>
 </html>
