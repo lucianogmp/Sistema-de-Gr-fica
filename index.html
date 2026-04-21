@@ -385,7 +385,7 @@ nav{padding:8px 0;flex:1}
           <div class="card-header" style="background:#922b21">⚠️ Contas a Pagar Atrasadas</div>
           <div class="card-body" style="padding:0">
             <table class="tbl"><thead><tr><th>Descrição</th><th>Valor</th><th>Venceu em</th></tr></thead>
-            <tbody id="tbody-pagar-atrasado"><tr><td colspan="3" class="empty-state">Nenhuma em atraso.</td></tr></tbody>
+            <tbody id="tbody-pagar-atrasado"><tr><td colspan="3" class="empty-state">Nenhuma em atraso.</td></tr></tbody></table>
           </div>
         </div>
       </div>
@@ -486,11 +486,11 @@ nav{padding:8px 0;flex:1}
               </div>
               <div><div class="orc-label">Material</div>
                 <select id="orc-material" class="orc-input" onchange="calcAdesivo()">
-                  <option value="90">Vinil — R$ 90/m²</option>
-                  <option value="120">Vinil com laminação — R$ 120/m²</option>
-                  <option value="90">Lona — R$ 90/m²</option>
-                  <option value="30">Papel comum 75g — R$ 30/m²</option>
-                  <option value="50">Papel mate 108g — R$ 50/m²</option>
+                  <option value="vinil:90">Vinil — R$ 90/m²</option>
+                  <option value="vinil-laminacao:120">Vinil com laminação — R$ 120/m²</option>
+                  <option value="lona:90">Lona — R$ 90/m²</option>
+                  <option value="papel-comum-75g:30">Papel comum 75g — R$ 30/m²</option>
+                  <option value="papel-mate-108g:50">Papel mate 108g — R$ 50/m²</option>
                 </select>
               </div>
               <div><div class="orc-label">Tem arte?</div>
@@ -638,8 +638,8 @@ nav{padding:8px 0;flex:1}
           <div style="font-size:13px;color:var(--muted);text-align:center;max-width:400px">
             Gerencie a fila de produção pelo Trello. Clique no botão abaixo para abrir seu board ou configure o link nas <strong>Configurações</strong>.
           </div>
-          <button class="btn btn-blue" style="font-size:14px;padding:12px 28px" onclick="abrirTrello()">🔗 Abrir Board do Trello</button>
-          <div style="font-size:11px;color:var(--muted)">Não tem board? <a href="https://trello.com" target="_blank" style="color:var(--blue)">Criar no Trello</a></div>
+          <button class="btn btn-blue" id="btn-abrir-trello" style="font-size:14px;padding:12px 28px" onclick="abrirTrello()">🔗 Abrir Board do Trello</button>
+          <div id="producao-trello-help" style="font-size:11px;color:var(--muted)">Não tem board? <a href="https://trello.com" target="_blank" style="color:var(--blue)">Criar no Trello</a></div>
         </div>
       </div>
     </div>
@@ -938,6 +938,13 @@ function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
 function uid() { return Date.now() + Math.random().toString(36).slice(2); }
 function fmt(v) { return 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d) { if(!d) return '—'; return d.split('-').reverse().join('/'); }
+function getOrcMaterialInfo() {
+  const elMat = document.getElementById('orc-material');
+  if (!elMat || elMat.selectedIndex < 0) return { nome:'Material', preco:0 };
+  const nome = elMat.options[elMat.selectedIndex].text.split('—')[0].trim();
+  const preco = parseFloat((elMat.value || '').split(':')[1]) || 0;
+  return { nome, preco };
+}
 
 // ===== NAVIGATION =====
 function setTab(tab) {
@@ -950,7 +957,7 @@ function setTab(tab) {
   if (activeNav) activeNav.classList.add('active');
   const titles = {dashboard:'Painel inicial',financeiro:'Gerente Financeiro',vendas:'Vendas',orcamento:'Orçamento',clientes:'Clientes',produtos:'Produtos',producao:'Produção',config:'Configurações'};
   document.getElementById('topbar-title').textContent = titles[safeTab] || safeTab;
-  const renders = {dashboard:renderDashboard, financeiro:renderFinanceiro, vendas:renderVendas, clientes:renderClientes, produtos:renderProdutos, config:renderConfig};
+  const renders = {dashboard:renderDashboard, financeiro:renderFinanceiro, vendas:renderVendas, orcamento:renderOrcamento, clientes:renderClientes, produtos:renderProdutos, producao:renderProducao, config:renderConfig};
   if (renders[safeTab]) renders[safeTab]();
 }
 
@@ -1329,6 +1336,19 @@ function abrirTrello() {
   window.open(url, '_blank');
 }
 
+function renderProducao() {
+  const btn = document.getElementById('btn-abrir-trello');
+  const help = document.getElementById('producao-trello-help');
+  if (!btn || !help) return;
+  if (cfg.trello) {
+    btn.textContent = '🔗 Abrir Board Configurado';
+    help.textContent = `Board atual: ${cfg.trello}`;
+  } else {
+    btn.textContent = '🔗 Abrir Board do Trello';
+    help.innerHTML = 'Não tem board? <a href="https://trello.com" target="_blank" style="color:var(--blue)">Criar no Trello</a>';
+  }
+}
+
 // ===== PRODUTOS =====
 function renderProdutos() {
   // Grupos
@@ -1457,6 +1477,14 @@ function populateGrupoSelect(selectedId) {
 }
 
 // ===== ORÇAMENTO =====
+function renderOrcamento() {
+  updateSelects();
+  setOrcTab('produtos');
+  document.getElementById('op-res-area').textContent = '—';
+  document.getElementById('op-res-unit').textContent = 'R$ 0,00';
+  document.getElementById('op-res-total').textContent = 'R$ 0,00';
+}
+
 function setOrcTab(tab) {
   ['produtos','adesivo','folha','hist'].forEach(t => {
     document.getElementById('orc-'+t).style.display = t===tab?'block':'none';
@@ -1565,8 +1593,7 @@ function calcAdesivo() {
   const a = parseFloat(elA.value) || 0;
   const qtd = parseInt(elQtd.value) || 1;
 
-  // ⚠️ Aqui é o ponto crítico (value precisa ser número no HTML)
-  const preco = parseFloat(elMat.value);
+  const { nome: materialNome, preco } = getOrcMaterialInfo();
   if (isNaN(preco)) {
     console.warn('Preço do material inválido. Verifique o value do select.');
   }
@@ -1607,15 +1634,8 @@ function calcAdesivo() {
   if (elUnit) elUnit.textContent = fmt(unit);
   if (elTotal) elTotal.textContent = fmt(total);
 
-  // Nome do material (seguro)
-  let mat = 'Material';
-  if (elMat.selectedIndex >= 0) {
-    const txt = elMat.options[elMat.selectedIndex].text;
-    mat = txt.split('—')[0].trim();
-  }
-
   if (elDet) {
-    elDet.textContent = `${l}cm × ${a}cm × ${qtd} un. | ${mat}${temArte ? ' | Arte incluída' : ''}`;
+    elDet.textContent = `${l}cm × ${a}cm × ${qtd} un. | ${materialNome}${temArte ? ' | Arte incluída' : ''}`;
   }
 
   if (elBtn) {
@@ -1637,7 +1657,8 @@ function calcAdesivo() {
 function salvarOrcamento() {
   const l=document.getElementById('orc-largura').value||0, a=document.getElementById('orc-altura').value||0, qtd=document.getElementById('orc-qtd').value||1;
   if (!ultimoOrcamento) calcAdesivo();
-  const item = { data:new Date().toLocaleDateString('pt-BR'), cliente:document.getElementById('orc-cliente').value||'Sem nome', mat:document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim(), medidas:`${l}×${a}cm`, qtd, total:ultimoOrcamento?ultimoOrcamento.total:0, id:uid() };
+  const { nome: mat } = getOrcMaterialInfo();
+  const item = { data:new Date().toLocaleDateString('pt-BR'), cliente:document.getElementById('orc-cliente').value||'Sem nome', mat, medidas:`${l}×${a}cm`, qtd, total:ultimoOrcamento?ultimoOrcamento.total:0, id:uid() };
   historicoOrc.push(item);
   save('gmp_hist_orc', historicoOrc);
   alert('Orçamento salvo!');
@@ -1666,14 +1687,14 @@ function enviarWhatsapp() {
   const tel=document.getElementById('orc-tel').value.replace(/\D/g,'');
   const cliente=document.getElementById('orc-cliente').value||'cliente';
   const total=ultimoOrcamento?fmt(ultimoOrcamento.total):'R$ 0,00';
-  const mat=document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
+  const { nome: mat } = getOrcMaterialInfo();
   const msg=encodeURIComponent(`Olá ${cliente}!\n\nMaterial: ${mat}\nMedidas: ${document.getElementById('orc-largura').value||'?'}cm × ${document.getElementById('orc-altura').value||'?'}cm\nQtd: ${document.getElementById('orc-qtd').value||1}\nTotal: ${total}\n\nObrigado!`);
   window.open((tel?`https://wa.me/55${tel}?text=${msg}`:`https://wa.me/?text=${msg}`),'_blank');
 }
 function gerarPDF() {
   const cliente=document.getElementById('orc-cliente').value||'Cliente', tel=document.getElementById('orc-tel').value||'—', vendedor=document.getElementById('orc-vendedor').value||'—';
   const l=document.getElementById('orc-largura').value||'0', a=document.getElementById('orc-altura').value||'0', qtd=document.getElementById('orc-qtd').value||'1';
-  const mat=document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
+  const { nome: mat } = getOrcMaterialInfo();
   const total=ultimoOrcamento?fmt(ultimoOrcamento.total):'R$ 0,00';
   const unit=ultimoOrcamento?fmt(ultimoOrcamento.total/(parseInt(qtd)||1)):'R$ 0,00';
   const area=((parseFloat(l)/100)*(parseFloat(a)/100)*(parseInt(qtd)||1)).toFixed(2);
@@ -1730,13 +1751,6 @@ function updateSelects() {
 function init() {
   applyLogo();
   updateSelects();
-  renderDashboard();
-  // Pre-fill config fields
-  document.getElementById('cfg-trello').value = cfg.trello||'';
-  document.getElementById('cfg-logo').value = cfg.logo||'';
-  document.getElementById('cfg-mao-obra').value = cfg.maoObra||0;
-  document.getElementById('cfg-materia').value = cfg.materia||0;
-  document.getElementById('cfg-terceiro').value = cfg.terceiro||0;
 }
 
 init();
