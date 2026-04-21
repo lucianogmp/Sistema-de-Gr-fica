@@ -170,6 +170,15 @@ nav{padding:8px 0;flex:1}
 .conta-item:last-child{border-bottom:none}
 .conta-nome{display:flex;align-items:center;gap:8px;font-weight:500}
 .conta-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+
+/* AUTOCOMPLETE / SEARCHABLE SELECT */
+.autocomplete-wrap{position:relative}
+.autocomplete-wrap input{width:100%}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.autocomplete-item{padding:8px 10px;font-size:13px;cursor:pointer;transition:background .1s}
+.autocomplete-item:hover,.autocomplete-item.selected{background:#e8f4fd;color:var(--blue)}
+.autocomplete-item.empty{color:var(--muted);cursor:default;font-style:italic}
+.autocomplete-item.empty:hover{background:#fff}
 </style>
 </head>
 <body>
@@ -344,8 +353,6 @@ nav{padding:8px 0;flex:1}
 
       <!-- LANÇAMENTOS -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-
-        <!-- A RECEBER -->
         <div class="card">
           <div class="card-header">📥 Contas a Receber
             <button class="btn btn-green" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-receber')">+ Lançar</button>
@@ -357,8 +364,6 @@ nav{padding:8px 0;flex:1}
             </table>
           </div>
         </div>
-
-        <!-- A PAGAR -->
         <div class="card">
           <div class="card-header">📤 Contas a Pagar
             <button class="btn btn-red" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-pagar')">+ Lançar</button>
@@ -421,34 +426,46 @@ nav{padding:8px 0;flex:1}
       </div>
 
       <!-- PRODUTOS/SERVIÇOS -->
+      <!-- ALTERAÇÃO 1 e 2: campo produto com busca (prodsEst), campo cliente com busca (clientes) -->
+      <!-- ALTERAÇÃO 3: Removidos largura, altura e arte inclusa -->
       <div id="orc-produtos">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div class="card">
-            <div class="card-header">🛍 Calcular produto/serviço
-              <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-prod-orc')">+ Novo Produto</button>
-            </div>
+            <div class="card-header">🛍 Calcular produto/serviço</div>
             <div class="card-body">
+              <!-- CLIENTE com busca -->
               <div class="form-row form-row-2" style="margin-bottom:10px">
-                <div><label class="fl">Cliente</label><input id="op-cliente" class="fi" placeholder="Nome do cliente"></div>
+                <div>
+                  <label class="fl">Cliente</label>
+                  <div class="autocomplete-wrap" id="op-cliente-wrap">
+                    <input id="op-cliente" class="fi" placeholder="Buscar cliente..." autocomplete="off"
+                      oninput="acSearch('op-cliente','op-cliente-id','clientes')"
+                      onfocus="acSearch('op-cliente','op-cliente-id','clientes')"
+                      onblur="setTimeout(()=>acHide('op-cliente'),180)">
+                    <input type="hidden" id="op-cliente-id">
+                    <div class="autocomplete-list" id="op-cliente-list" style="display:none"></div>
+                  </div>
+                </div>
                 <div><label class="fl">Vendedor</label><select id="op-vendedor" class="fi"><option value="">Selecionar...</option></select></div>
               </div>
-              <div><label class="fl">Produto/Serviço</label>
-                <select id="op-produto" class="fi" onchange="calcProduto()" style="margin-bottom:10px">
-                  <option value="">Selecionar produto...</option>
-                </select>
-              </div>
-              <div class="form-row form-row-2" style="margin-bottom:10px">
-                <div><label class="fl">Quantidade</label><input id="op-qtd" type="number" class="fi" value="1" min="1" oninput="calcProduto()"></div>
-                <div><label class="fl">Largura (cm)</label><input id="op-larg" type="number" class="fi" placeholder="se m²" oninput="calcProduto()"></div>
-              </div>
-              <div class="form-row form-row-2" style="margin-bottom:14px">
-                <div><label class="fl">Altura (cm)</label><input id="op-alt" type="number" class="fi" placeholder="se m²" oninput="calcProduto()"></div>
-                <div><label class="fl">Arte inclusa?</label>
-                  <select id="op-arte" class="fi" onchange="calcProduto()"><option value="0">Não</option><option value="30">Sim (+R$ 30)</option></select>
+              <!-- PRODUTO com busca (do estoque prodsEst) -->
+              <div style="margin-bottom:10px">
+                <label class="fl">Produto/Serviço</label>
+                <div class="autocomplete-wrap" id="op-produto-wrap">
+                  <input id="op-produto-search" class="fi" placeholder="Buscar produto do estoque..." autocomplete="off"
+                    oninput="acSearch('op-produto-search','op-produto-id','prodsEst')"
+                    onfocus="acSearch('op-produto-search','op-produto-id','prodsEst')"
+                    onblur="setTimeout(()=>acHide('op-produto-search'),180)">
+                  <input type="hidden" id="op-produto-id">
+                  <div class="autocomplete-list" id="op-produto-search-list" style="display:none"></div>
                 </div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-                <div class="res-box"><div class="res-label">Área</div><div class="res-val" id="op-res-area">—</div></div>
+              <!-- Quantidade -->
+              <div class="form-row form-row-2" style="margin-bottom:14px">
+                <div><label class="fl">Quantidade</label><input id="op-qtd" type="number" class="fi" value="1" min="1" oninput="calcProduto()"></div>
+                <div id="op-preco-wrap" style="display:none"><label class="fl">Preço manual (R$)</label><input id="op-preco-manual" type="number" class="fi" placeholder="0,00" oninput="calcProduto()"></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
                 <div class="res-box"><div class="res-label">Unitário</div><div class="res-val" id="op-res-unit">R$ 0,00</div></div>
                 <div class="res-box" style="background:var(--blue)"><div class="res-label" style="color:rgba(255,255,255,0.7)">Total</div><div class="res-val" id="op-res-total" style="color:#fff;font-size:20px">R$ 0,00</div></div>
               </div>
@@ -459,7 +476,7 @@ nav{padding:8px 0;flex:1}
             </div>
           </div>
           <div class="card">
-            <div class="card-header">📋 Produtos cadastrados</div>
+            <div class="card-header">📋 Produtos do estoque</div>
             <div class="card-body" style="padding:0">
               <div id="prod-lista"><div class="empty-state">Nenhum produto cadastrado.</div></div>
             </div>
@@ -467,17 +484,36 @@ nav{padding:8px 0;flex:1}
         </div>
       </div>
 
-      <!-- ADESIVO -->
+      <!-- ADESIVO/BANNER -->
+      <!-- ALTERAÇÃO 4: botão converter em venda visível + seleção de cliente com busca + pega telefone do cadastro -->
+      <!-- ALTERAÇÃO 5: "Tem arte?" Sim (não cobra 30%) / Não (cobra 30% de acréscimo), cálculo oculto -->
       <div id="orc-adesivo" style="display:none">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div class="card">
             <div class="card-header">📐 Cálculo de adesivo / banner</div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+              <!-- CLIENTE com busca + telefone automático -->
               <div class="form-row form-row-2">
-                <div><div class="orc-label">Nome do cliente</div><input id="orc-cliente" class="orc-input" placeholder="Ex: João Silva"></div>
-                <div><div class="orc-label">Telefone</div><input id="orc-tel" class="orc-input" placeholder="(00) 00000-0000"></div>
+                <div>
+                  <div class="orc-label">Nome do cliente</div>
+                  <div class="autocomplete-wrap">
+                    <input id="orc-cliente" class="orc-input" placeholder="Buscar cliente..." autocomplete="off"
+                      oninput="acSearch('orc-cliente','orc-cliente-id','clientes'); acAutoFillTel()"
+                      onfocus="acSearch('orc-cliente','orc-cliente-id','clientes')"
+                      onblur="setTimeout(()=>acHide('orc-cliente'),180)">
+                    <input type="hidden" id="orc-cliente-id">
+                    <div class="autocomplete-list" id="orc-cliente-list" style="display:none"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="orc-label">Telefone <span style="font-size:10px;color:var(--blue)">(preenchido automaticamente)</span></div>
+                  <input id="orc-tel" class="orc-input" placeholder="(00) 00000-0000">
+                </div>
               </div>
-              <div><div class="orc-label">Vendedor</div><select id="orc-vendedor" class="orc-input"><option value="">Selecionar...</option></select></div>
+              <div>
+                <div class="orc-label">Vendedor</div>
+                <select id="orc-vendedor" class="orc-input"><option value="">Selecionar...</option></select>
+              </div>
               <hr style="border:none;border-top:1px solid var(--border)">
               <div class="form-row form-row-3">
                 <div><div class="orc-label">Largura (cm)</div><input id="orc-largura" type="number" class="orc-input" oninput="calcAdesivo()"></div>
@@ -493,16 +529,23 @@ nav{padding:8px 0;flex:1}
                   <option value="papel-mate-108g:50">Papel mate 108g — R$ 50/m²</option>
                 </select>
               </div>
-              <div><div class="orc-label">Tem arte?</div>
-                <div style="display:flex;gap:12px">
-                  <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="radio" name="arte" id="arte-sim" onchange="calcAdesivo()"> Sim (+R$ 30)</label>
-                  <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="radio" name="arte" id="arte-nao" checked onchange="calcAdesivo()"> Não</label>
+              <!-- ALTERAÇÃO 5: Tem arte? Sim = sem acréscimo, Não = +30% (cálculo oculto) -->
+              <div>
+                <div class="orc-label">Tem a arte?</div>
+                <div style="display:flex;gap:16px;margin-top:4px">
+                  <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s" id="label-arte-sim">
+                    <input type="radio" name="arte" id="arte-sim" value="sim" onchange="calcAdesivo()" checked> Sim
+                  </label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s" id="label-arte-nao">
+                    <input type="radio" name="arte" id="arte-nao" value="nao" onchange="calcAdesivo()"> Não
+                  </label>
                 </div>
               </div>
               <div style="display:flex;gap:8px">
                 <button class="btn btn-blue" onclick="salvarOrcamento()" style="flex:1">💾 Salvar</button>
                 <button class="btn btn-gray" onclick="limparOrcamento()">🗑 Limpar</button>
               </div>
+              <!-- ALTERAÇÃO 4: botão converter sempre visível após cálculo -->
               <button class="btn btn-green" onclick="orcToVenda()" id="btn-converter" style="display:none;width:100%">➕ Converter em venda</button>
             </div>
           </div>
@@ -600,7 +643,6 @@ nav{padding:8px 0;flex:1}
   <div id="tab-produtos" class="tab-content">
     <div class="content">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <!-- GRUPOS -->
         <div class="card">
           <div class="card-header">📦 Grupos de produtos
             <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-grupo')">+ Novo Grupo</button>
@@ -609,7 +651,6 @@ nav{padding:8px 0;flex:1}
             <div class="empty-state">Nenhum grupo cadastrado.</div>
           </div>
         </div>
-        <!-- PRODUTOS -->
         <div class="card">
           <div class="card-header">🏷 Produtos/Serviços
             <button class="btn btn-green" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-produtos-prod')">+ Novo Produto</button>
@@ -619,7 +660,6 @@ nav{padding:8px 0;flex:1}
           </div>
         </div>
       </div>
-      <!-- MATÉRIA PRIMA POR PRODUTO -->
       <div class="card">
         <div class="card-header">🔩 Composição de matéria prima por produto</div>
         <div class="card-body" style="padding:0" id="mp-lista">
@@ -649,8 +689,6 @@ nav{padding:8px 0;flex:1}
   <div id="tab-config" class="tab-content">
     <div class="content">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-
-        <!-- VENDEDORES -->
         <div class="card">
           <div class="card-header">👤 Vendedores
             <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-vendedor')">+ Novo Vendedor</button>
@@ -660,8 +698,6 @@ nav{padding:8px 0;flex:1}
             <tbody id="tbody-vendedores"><tr><td colspan="3" class="empty-state">Nenhum vendedor cadastrado.</td></tr></tbody></table>
           </div>
         </div>
-
-        <!-- TRELLO -->
         <div class="card">
           <div class="card-header">🔗 Link do Trello</div>
           <div class="card-body">
@@ -670,8 +706,6 @@ nav{padding:8px 0;flex:1}
             <button class="btn btn-blue" onclick="salvarTrello()" style="width:100%">Salvar link</button>
           </div>
         </div>
-
-        <!-- LOGO -->
         <div class="card">
           <div class="card-header">🖼 Logo do sistema</div>
           <div class="card-body">
@@ -681,8 +715,6 @@ nav{padding:8px 0;flex:1}
             <div style="font-size:11px;color:var(--muted);margin-top:8px">Coloque o arquivo logo-sidebar.png no repositório e use: logo-sidebar.png</div>
           </div>
         </div>
-
-        <!-- CUSTOS PRODUTIVOS -->
         <div class="card">
           <div class="card-header">🏭 Custos produtivos mensais</div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
@@ -692,7 +724,6 @@ nav{padding:8px 0;flex:1}
             <button class="btn btn-blue" onclick="salvarCustosProd()" style="width:100%">Salvar custos</button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -858,22 +889,6 @@ nav{padding:8px 0;flex:1}
   </div>
 </div>
 
-<!-- MODAL PRODUTO ORÇAMENTO -->
-<div class="modal-overlay" id="modal-prod-orc">
-  <div class="modal">
-    <h3>Novo produto p/ orçamento</h3>
-    <div style="margin-bottom:10px"><label class="fl">Nome do produto</label><input id="mpo-nome" class="fi" placeholder="Ex: Banner 1x1m"></div>
-    <div class="form-row form-row-2" style="margin-bottom:10px">
-      <div><label class="fl">Preço por unidade (R$)</label><input id="mpo-preco" type="number" class="fi" placeholder="0,00"></div>
-      <div><label class="fl">Usa m²?</label><select id="mpo-m2" class="fi"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-gray" onclick="closeModal('modal-prod-orc')">Cancelar</button>
-      <button class="btn btn-blue" onclick="salvarProdOrc()">Salvar</button>
-    </div>
-  </div>
-</div>
-
 <script>
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
@@ -907,10 +922,82 @@ function getOrcMaterialInfo() {
   return { nome, preco };
 }
 
+// ===== AUTOCOMPLETE ENGINE =====
+// Mapa de fonte de dados por nome de variável string
+function acGetSource(sourceName) {
+  if (sourceName === 'clientes') return clientes;
+  if (sourceName === 'prodsEst') return prodsEst;
+  return [];
+}
+
+function acSearch(inputId, hiddenId, sourceName) {
+  const input = document.getElementById(inputId);
+  const list  = document.getElementById(inputId + '-list');
+  if (!input || !list) return;
+
+  const q   = input.value.toLowerCase().trim();
+  const src = acGetSource(sourceName);
+
+  // Filtra itens pelo nome
+  const filtered = q
+    ? src.filter(item => item.nome.toLowerCase().includes(q))
+    : src;
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="autocomplete-item empty">Nenhum resultado</div>';
+  } else {
+    list.innerHTML = filtered.map(item => {
+      // Detalhe extra: preço para produtos, telefone para clientes
+      let detail = '';
+      if (sourceName === 'prodsEst') {
+        detail = `<span style="font-size:11px;color:var(--blue);margin-left:6px">${fmt(item.preco)} / ${item.unid||'un'}</span>`;
+      } else if (sourceName === 'clientes') {
+        detail = item.tel ? `<span style="font-size:11px;color:var(--muted);margin-left:6px">${item.tel}</span>` : '';
+      }
+      return `<div class="autocomplete-item" onmousedown="acSelect('${inputId}','${hiddenId}','${item.id}','${item.nome.replace(/'/g,"\\'")}','${sourceName}')">${item.nome}${detail}</div>`;
+    }).join('');
+  }
+
+  list.style.display = 'block';
+}
+
+function acSelect(inputId, hiddenId, id, nome, sourceName) {
+  const input  = document.getElementById(inputId);
+  const hidden = document.getElementById(hiddenId);
+  const list   = document.getElementById(inputId + '-list');
+  if (input)  input.value  = nome;
+  if (hidden) hidden.value = id;
+  if (list)   list.style.display = 'none';
+
+  // Ações pós-seleção
+  if (sourceName === 'prodsEst') {
+    calcProduto();
+  } else if (sourceName === 'clientes') {
+    // Preenche telefone automaticamente no adesivo/banner
+    acAutoFillTel();
+  }
+}
+
+function acHide(inputId) {
+  const list = document.getElementById(inputId + '-list');
+  if (list) list.style.display = 'none';
+}
+
+// Preenche telefone do cliente selecionado no campo orc-tel (Adesivo/Banner)
+function acAutoFillTel() {
+  const hiddenId = document.getElementById('orc-cliente-id');
+  if (!hiddenId) return;
+  const id = hiddenId.value;
+  const cli = clientes.find(c => c.id === id);
+  const telField = document.getElementById('orc-tel');
+  if (telField && cli && cli.tel) {
+    telField.value = cli.tel;
+  }
+}
+
 // ===== NAVIGATION =====
 function setTab(tab) {
   const safeTab = document.getElementById('tab-'+tab) ? tab : 'dashboard';
-  if (safeTab !== tab) console.warn(`Tab "${tab}" não encontrada. Voltando para "dashboard".`);
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-'+safeTab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -923,13 +1010,8 @@ function setTab(tab) {
 }
 
 // ===== MODALS =====
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  editingId = null;
-}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); editingId = null; }
 
 // ===== LOGO =====
 function applyLogo() {
@@ -969,7 +1051,6 @@ function renderDashboard() {
   document.getElementById('r-pagas').textContent = pagas;
   document.getElementById('r-pend').textContent = pendentes;
 
-  // Avisos
   const avisos = document.getElementById('d-avisos');
   let html = '';
   const valPend = vendas.filter(v=>v.status==='pendente').reduce((a,v)=>a+v.valor,0);
@@ -981,7 +1062,6 @@ function renderDashboard() {
   if (atrassPag.length) html += `<div class="aviso-item"><div class="aviso-dot" style="background:var(--red)"></div><span><strong>${atrassPag.length} conta(s) a pagar</strong> em atraso</span></div>`;
   avisos.innerHTML = html || `<div class="aviso-item"><div class="aviso-dot" style="background:var(--green)"></div><span>Nenhum aviso. Tudo certo!</span></div>`;
 
-  // Gráfico barras
   const meses = Array(12).fill(0);
   vendas.forEach(v => meses[v.mes] += v.valor);
   if (barChart) { barChart.data.datasets[0].data = meses; barChart.update(); }
@@ -992,8 +1072,6 @@ function renderDashboard() {
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f0f2f5'},ticks:{font:{family:'Sora',size:11}}},x:{grid:{display:false},ticks:{font:{family:'Sora',size:11}}}}}
     });
   }
-
-  // Gráfico pizza
   if (pizzaChart) { pizzaChart.data.datasets[0].data = [pagas, pendentes]; pizzaChart.update(); }
   else {
     pizzaChart = new Chart(document.getElementById('pizzaChart'), {
@@ -1010,7 +1088,6 @@ function renderFinanceiro() {
   const totalPag = pagar.filter(p=>p.status==='pendente').reduce((a,p)=>a+p.valor,0);
   const fluxo = totalRec - totalPag;
   const saldo = contas.reduce((a,c)=>a+c.saldo,0);
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
 
   document.getElementById('f-receber').textContent = fmt(totalRec);
   document.getElementById('f-receber-qtd').textContent = receber.filter(r=>r.status==='pendente').length + ' lançamentos';
@@ -1021,7 +1098,6 @@ function renderFinanceiro() {
   document.getElementById('f-saldo').textContent = fmt(saldo);
   document.getElementById('f-saldo-sub').textContent = contas.length + ' conta(s) cadastrada(s)';
 
-  // Contas
   const cl = document.getElementById('f-contas-lista');
   if (!contas.length) { cl.innerHTML = '<div class="empty-state">Nenhuma conta cadastrada.</div>'; }
   else {
@@ -1036,10 +1112,8 @@ function renderFinanceiro() {
       </div>`).join('');
   }
 
-  // Tabelas receber/pagar
   renderTabelaFinanceiro();
 
-  // Gráfico fluxo
   const mesesRec = Array(12).fill(0);
   const mesesPag = Array(12).fill(0);
   receber.forEach(r => { const m = r.venc ? new Date(r.venc).getMonth() : new Date().getMonth(); mesesRec[m] += r.valor; });
@@ -1224,11 +1298,10 @@ function excluirCliente(id) {
   updateSelects();
 }
 
-// ===== VENDEDORES =====
+// ===== VENDEDORES / CONFIG =====
 function renderConfig() {
   const tbody = document.getElementById('tbody-vendedores');
   if (!tbody) return;
-
   if (!vendedores.length) {
     tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum vendedor cadastrado.</td></tr>';
   } else {
@@ -1241,19 +1314,14 @@ function renderConfig() {
       </td>
     </tr>`).join('');
   }
-
   const trello = document.getElementById('cfg-trello');
   if (trello) trello.value = cfg.trello||'';
-
   const logo = document.getElementById('cfg-logo');
   if (logo) logo.value = cfg.logo||'';
-
   const mao = document.getElementById('cfg-mao-obra');
   if (mao) mao.value = cfg.maoObra||0;
-
   const mat = document.getElementById('cfg-materia');
   if (mat) mat.value = cfg.materia||0;
-
   const ter = document.getElementById('cfg-terceiro');
   if (ter) ter.value = cfg.terceiro||0;
 }
@@ -1296,7 +1364,6 @@ function abrirTrello() {
   const url = cfg.trello || 'https://trello.com';
   window.open(url, '_blank');
 }
-
 function renderProducao() {
   const btn = document.getElementById('btn-abrir-trello');
   const help = document.getElementById('producao-trello-help');
@@ -1312,7 +1379,6 @@ function renderProducao() {
 
 // ===== PRODUTOS =====
 function renderProdutos() {
-  // Grupos
   const gl = document.getElementById('grupos-lista');
   if (!gruposEst.length) { gl.innerHTML = '<div class="empty-state">Nenhum grupo cadastrado.</div>'; }
   else {
@@ -1323,7 +1389,6 @@ function renderProdutos() {
         <button class="act-btn act-del" onclick="excluirGrupo('${g.id}')">✕</button>
       </div>`).join('');
   }
-  // Produtos
   const pl = document.getElementById('produtos-prod-lista');
   if (!prodsEst.length) { pl.innerHTML = '<div class="empty-state">Nenhum produto cadastrado.</div>'; }
   else {
@@ -1343,7 +1408,6 @@ function renderProdutos() {
   }
   document.getElementById('mp-lista').innerHTML = '<div class="empty-state">Clique em 🔩 MP para ver a composição de um produto.</div>';
   populateGrupoSelect();
-  renderProdsOrcamento();
 }
 
 function verMP(id) {
@@ -1424,7 +1488,7 @@ function editarProdutosProd(id) {
     div.innerHTML = `<input class="fi fi-sm" style="flex:1" placeholder="Material" value="${m.nome}"><input class="fi fi-sm" style="width:80px" type="number" placeholder="Qtd" value="${m.qtd}"><button class="btn btn-gray" style="padding:4px 8px;font-size:12px" onclick="removeMpRow(this)">✕</button>`;
     container.appendChild(div);
   });
-  openModal('modal-Produtos-prod');
+  openModal('modal-produtos-prod');
 }
 function excluirProdutosProd(id) {
   if (!confirm('Remover este produto?')) return;
@@ -1441,7 +1505,6 @@ function populateGrupoSelect(selectedId) {
 function renderOrcamento() {
   updateSelects();
   setOrcTab('produtos');
-  document.getElementById('op-res-area').textContent = '—';
   document.getElementById('op-res-unit').textContent = 'R$ 0,00';
   document.getElementById('op-res-total').textContent = 'R$ 0,00';
 }
@@ -1456,64 +1519,67 @@ function setOrcTab(tab) {
   if (tab==='produtos') renderProdsOrcamento();
 }
 
+// ALTERAÇÃO 1: Lista de produtos do estoque (prodsEst) no painel lateral
 function renderProdsOrcamento() {
-  const sel = document.getElementById('op-produto');
-  if (!sel) return;
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">Selecionar produto...</option>' + prodsOrc.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
-  if (cur) sel.value = cur;
   const lista = document.getElementById('prod-lista');
-  if (!prodsOrc.length) { lista.innerHTML = '<div class="empty-state">Nenhum produto cadastrado.</div>'; return; }
-  lista.innerHTML = prodsOrc.map(p=>`
-    <div class="tree-item">
-      <div style="flex:1"><div style="font-weight:500">${p.nome}</div>
-      <div style="font-size:11px;color:var(--blue)">${fmt(p.preco)} ${p.m2==='sim'?'/ m²':'/ un'}</div></div>
-      <button class="act-btn act-del" onclick="excluirProdOrc('${p.id}')">✕</button>
-    </div>`).join('');
+  if (!prodsEst.length) { lista.innerHTML = '<div class="empty-state">Nenhum produto no estoque.<br><small style="color:var(--muted)">Cadastre em Produtos → Produtos/Serviços</small></div>'; return; }
+  lista.innerHTML = prodsEst.map(p=>{
+    const g = gruposEst.find(gr=>gr.id===p.grupoId);
+    return `<div class="tree-item" style="cursor:pointer" onclick="selecionarProdutoOrc('${p.id}')">
+      <div style="flex:1">
+        <span style="font-size:10px;color:var(--muted)">${g?g.nome:'—'}${p.subgrupo?' › '+p.subgrupo:''}</span>
+        <div style="font-weight:500;font-size:13px">${p.nome}</div>
+        <span style="font-size:11px;color:var(--blue)">${fmt(p.preco)} / ${p.unid||'un'}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function salvarProdOrc() {
-  prodsOrc.push({ id:uid(), nome:document.getElementById('mpo-nome').value||'Produto', preco:parseFloat(document.getElementById('mpo-preco').value)||0, m2:document.getElementById('mpo-m2').value });
-  save('gmp_prods_orc', prodsOrc);
-  closeModal('modal-prod-orc');
-  renderProdsOrcamento();
-}
-function excluirProdOrc(id) {
-  prodsOrc = prodsOrc.filter(p=>p.id!==id);
-  save('gmp_prods_orc', prodsOrc);
-  renderProdsOrcamento();
+// Seleciona produto do estoque ao clicar na lista
+function selecionarProdutoOrc(id) {
+  const p = prodsEst.find(p=>p.id===id);
+  if (!p) return;
+  document.getElementById('op-produto-search').value = p.nome;
+  document.getElementById('op-produto-id').value = p.id;
+  calcProduto();
 }
 
+// ALTERAÇÃO 3: calcProduto sem largura/altura/arte; usa preço direto do produto
 function calcProduto() {
-  const pid = document.getElementById('op-produto').value;
-  const p = prodsOrc.find(p=>p.id===pid);
-  if (!p) { ['op-res-area','op-res-unit','op-res-total'].forEach(id=>document.getElementById(id).textContent='—'); return; }
-  const qtd = parseInt(document.getElementById('op-qtd').value)||1;
-  const arte = parseFloat(document.getElementById('op-arte').value)||0;
-  let unit = p.preco;
-  let area = '—';
-  if (p.m2==='sim') {
-    const l = parseFloat(document.getElementById('op-larg').value)||0;
-    const a = parseFloat(document.getElementById('op-alt').value)||0;
-    const m2 = (l/100)*(a/100);
-    unit = m2 * p.preco;
-    area = m2.toFixed(2) + ' m²';
+  const pid = document.getElementById('op-produto-id').value;
+  const p = prodsEst.find(p=>p.id===pid);
+
+  // Se não há produto do estoque selecionado, tenta preço manual
+  let unit = 0;
+  let nomeProd = '—';
+
+  if (p) {
+    unit = p.preco;
+    nomeProd = p.nome;
+    document.getElementById('op-preco-wrap').style.display = 'none';
+  } else {
+    // Serviço manual (sem produto no estoque)
+    const manual = parseFloat(document.getElementById('op-preco-manual').value) || 0;
+    unit = manual;
+    nomeProd = 'Serviço';
+    document.getElementById('op-preco-wrap').style.display = 'block';
   }
-  unit += arte;
+
+  const qtd = parseInt(document.getElementById('op-qtd').value)||1;
   const total = unit * qtd;
-  ultimoOrcamento = {total, nome:p.nome, qtd};
-  document.getElementById('op-res-area').textContent = area;
+  ultimoOrcamento = { total, nome: nomeProd, qtd };
+
   document.getElementById('op-res-unit').textContent = fmt(unit);
   document.getElementById('op-res-total').textContent = fmt(total);
 }
 
 function salvarOrcProduto() {
-  if (!ultimoOrcamento) { alert('Calcule o orçamento primeiro.'); return; }
+  if (!ultimoOrcamento) { alert('Selecione um produto e calcule o orçamento primeiro.'); return; }
   const item = {
     data: new Date().toLocaleDateString('pt-BR'),
-    cliente: document.getElementById('op-cliente').value||'Sem nome',
+    cliente: document.getElementById('op-cliente').value || 'Sem nome',
     mat: ultimoOrcamento.nome,
-    medidas: `${document.getElementById('op-larg').value||'—'}×${document.getElementById('op-alt').value||'—'}cm`,
+    medidas: '—',
     qtd: ultimoOrcamento.qtd,
     total: ultimoOrcamento.total,
     id: uid()
@@ -1535,33 +1601,24 @@ function orcProdToVenda() {
   openModal('modal-venda');
 }
 
+// ALTERAÇÃO 5: calcAdesivo com 30% de acréscimo quando NÃO tem arte
 function calcAdesivo() {
-  // Captura segura dos elementos
-  const elL = document.getElementById('orc-largura');
-  const elA = document.getElementById('orc-altura');
+  const elL   = document.getElementById('orc-largura');
+  const elA   = document.getElementById('orc-altura');
   const elQtd = document.getElementById('orc-qtd');
   const elMat = document.getElementById('orc-material');
-  const elArte = document.getElementById('arte-sim');
+  const elArteSim = document.getElementById('arte-sim'); // Sim = tem arte = sem acréscimo
 
-  // Verificação básica (evita quebra)
-  if (!elL || !elA || !elQtd || !elMat) {
-    console.error('Elementos do formulário não encontrados.');
-    return;
-  }
+  if (!elL || !elA || !elQtd || !elMat) return;
 
-  // Conversões seguras
-  const l = parseFloat(elL.value) || 0;
-  const a = parseFloat(elA.value) || 0;
+  const l   = parseFloat(elL.value) || 0;
+  const a   = parseFloat(elA.value) || 0;
   const qtd = parseInt(elQtd.value) || 1;
-
   const { nome: materialNome, preco } = getOrcMaterialInfo();
-  if (isNaN(preco)) {
-    console.warn('Preço do material inválido. Verifique o value do select.');
-  }
 
-  const temArte = elArte ? elArte.checked : false;
+  // Sim = TEM arte = não cobra os 30% | Não = SEM arte = cobra 30%
+  const temArte = elArteSim ? elArteSim.checked : true;
 
-  // Validação mínima (evita cálculo vazio)
   if (l <= 0 || a <= 0) {
     document.getElementById('res-area').textContent = '0,00 m²';
     document.getElementById('res-unit').textContent = 'R$ 0,00';
@@ -1571,89 +1628,96 @@ function calcAdesivo() {
     return;
   }
 
-  // Cálculo
   const m2u = (l / 100) * (a / 100);
-  const arte = temArte ? 30 : 0;
-  const unit = (m2u * (preco || 0)) + arte;
+  const baseUnit = m2u * preco;
+  // Se NÃO tem arte, acrescenta 30% sobre o valor base
+  const unit = temArte ? baseUnit : baseUnit * 1.30;
   const total = unit * qtd;
 
-  // Salva último orçamento
-  ultimoOrcamento = {
-    total,
-    nome: 'Adesivo/Banner',
-    qtd
-  };
+  ultimoOrcamento = { total, nome: 'Adesivo/Banner', qtd };
 
-  // Atualiza UI (com verificação)
-  const elArea = document.getElementById('res-area');
-  const elUnit = document.getElementById('res-unit');
-  const elTotal = document.getElementById('res-total');
-  const elDet = document.getElementById('res-detalhe');
-  const elBtn = document.getElementById('btn-converter');
-
-  if (elArea) elArea.textContent = (m2u * qtd).toFixed(2) + ' m²';
-  if (elUnit) elUnit.textContent = fmt(unit);
-  if (elTotal) elTotal.textContent = fmt(total);
-
-  if (elDet) {
-    elDet.textContent = `${l}cm × ${a}cm × ${qtd} un. | ${materialNome}${temArte ? ' | Arte incluída' : ''}`;
-  }
-
-  if (elBtn) {
-    elBtn.style.display = total > 0 ? 'block' : 'none';
-  }
-
-  // Debug útil (pode remover depois)
-  console.log({
-    largura: l,
-    altura: a,
-    qtd,
-    preco,
-    m2u,
-    unit,
-    total
-  });
+  document.getElementById('res-area').textContent  = (m2u * qtd).toFixed(2) + ' m²';
+  document.getElementById('res-unit').textContent  = fmt(unit);
+  document.getElementById('res-total').textContent = fmt(total);
+  document.getElementById('res-detalhe').textContent =
+    `${l}cm × ${a}cm × ${qtd} un. | ${materialNome}${!temArte ? ' | Arte incluída no valor (+30%)' : ''}`;
+  document.getElementById('btn-converter').style.display = total > 0 ? 'block' : 'none';
 }
 
 function salvarOrcamento() {
-  const l=document.getElementById('orc-largura').value||0, a=document.getElementById('orc-altura').value||0, qtd=document.getElementById('orc-qtd').value||1;
+  const l = document.getElementById('orc-largura').value||0;
+  const a = document.getElementById('orc-altura').value||0;
+  const qtd = document.getElementById('orc-qtd').value||1;
   if (!ultimoOrcamento) calcAdesivo();
   const { nome: mat } = getOrcMaterialInfo();
-  const item = { data:new Date().toLocaleDateString('pt-BR'), cliente:document.getElementById('orc-cliente').value||'Sem nome', mat, medidas:`${l}×${a}cm`, qtd, total:ultimoOrcamento?ultimoOrcamento.total:0, id:uid() };
+  const item = {
+    data: new Date().toLocaleDateString('pt-BR'),
+    cliente: document.getElementById('orc-cliente').value || 'Sem nome',
+    mat, medidas: `${l}×${a}cm`, qtd,
+    total: ultimoOrcamento ? ultimoOrcamento.total : 0,
+    id: uid()
+  };
   historicoOrc.push(item);
   save('gmp_hist_orc', historicoOrc);
   alert('Orçamento salvo!');
 }
+
 function limparOrcamento() {
-  ['orc-cliente','orc-tel','orc-largura','orc-altura'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('orc-qtd').value=1;
-  document.getElementById('arte-nao').checked=true;
+  ['orc-largura','orc-altura'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('orc-qtd').value = 1;
+  document.getElementById('orc-cliente').value = '';
+  document.getElementById('orc-cliente-id').value = '';
+  document.getElementById('orc-tel').value = '';
+  document.getElementById('arte-sim').checked = true;
   ['res-area','res-unit','res-total'].forEach((id,i)=>document.getElementById(id).textContent=['0,00 m²','R$ 0,00','R$ 0,00'][i]);
   document.getElementById('res-detalhe').textContent='Preencha as medidas para ver o resultado.';
   document.getElementById('btn-converter').style.display='none';
   ultimoOrcamento=null;
 }
+
+// ALTERAÇÃO 4: orcToVenda já preenche cliente e pega telefone do cadastro
 function orcToVenda() {
   if (!ultimoOrcamento) return;
+  const clienteId = document.getElementById('orc-cliente-id').value;
+  const clienteNome = document.getElementById('orc-cliente').value || '';
   document.getElementById('mv-desc').value = 'Adesivo/Banner';
   document.getElementById('mv-valor').value = ultimoOrcamento.total;
-  document.getElementById('mv-custo').value = (ultimoOrcamento.total*0.6).toFixed(2);
+  document.getElementById('mv-custo').value = (ultimoOrcamento.total * 0.6).toFixed(2);
   document.getElementById('mv-status').value = 'pendente';
   document.getElementById('modal-venda-title').textContent = 'Nova Venda (do Orçamento)';
-  populateSelect('mv-cliente', clientes, 'id', 'nome');
-  populateSelect('mv-vendedor', vendedores, 'id', 'nome');
+  populateSelect('mv-cliente', clientes, 'id', 'nome', clienteId);
+  populateSelect('mv-vendedor', vendedores, 'id', 'nome',
+    document.getElementById('orc-vendedor').value);
   openModal('modal-venda');
 }
+
 function enviarWhatsapp() {
-  const tel=document.getElementById('orc-tel').value.replace(/\D/g,'');
-  const cliente=document.getElementById('orc-cliente').value||'cliente';
-  const total=ultimoOrcamento?fmt(ultimoOrcamento.total):'R$ 0,00';
+  // Pega o telefone: prioriza o campo (que pode ter sido preenchido automaticamente)
+  let tel = document.getElementById('orc-tel').value.replace(/\D/g,'');
+  // Se não tem no campo, tenta buscar do cadastro pelo ID selecionado
+  if (!tel) {
+    const id = document.getElementById('orc-cliente-id').value;
+    const cli = clientes.find(c=>c.id===id);
+    if (cli && cli.tel) tel = cli.tel.replace(/\D/g,'');
+  }
+  const cliente = document.getElementById('orc-cliente').value || 'cliente';
+  const total = ultimoOrcamento ? fmt(ultimoOrcamento.total) : 'R$ 0,00';
   const { nome: mat } = getOrcMaterialInfo();
-  const msg=encodeURIComponent(`Olá ${cliente}!\n\nMaterial: ${mat}\nMedidas: ${document.getElementById('orc-largura').value||'?'}cm × ${document.getElementById('orc-altura').value||'?'}cm\nQtd: ${document.getElementById('orc-qtd').value||1}\nTotal: ${total}\n\nObrigado!`);
+  const msg = encodeURIComponent(`Olá ${cliente}!\n\nMaterial: ${mat}\nMedidas: ${document.getElementById('orc-largura').value||'?'}cm × ${document.getElementById('orc-altura').value||'?'}cm\nQtd: ${document.getElementById('orc-qtd').value||1}\nTotal: ${total}\n\nObrigado!`);
   window.open((tel?`https://wa.me/55${tel}?text=${msg}`:`https://wa.me/?text=${msg}`),'_blank');
 }
+
 function gerarPDF() {
-  const cliente=document.getElementById('orc-cliente').value||'Cliente', tel=document.getElementById('orc-tel').value||'—', vendedor=document.getElementById('orc-vendedor').value||'—';
+  const cliente = document.getElementById('orc-cliente').value||'Cliente';
+  let tel = document.getElementById('orc-tel').value||'—';
+  if (tel==='—' || !tel) {
+    const id = document.getElementById('orc-cliente-id').value;
+    const cli = clientes.find(c=>c.id===id);
+    if (cli && cli.tel) tel = cli.tel;
+  }
+  const vendedorId = document.getElementById('orc-vendedor').value;
+  const ven = vendedores.find(v=>v.id===vendedorId);
+  const vendedor = ven ? ven.nome : (vendedorId||'—');
   const l=document.getElementById('orc-largura').value||'0', a=document.getElementById('orc-altura').value||'0', qtd=document.getElementById('orc-qtd').value||'1';
   const { nome: mat } = getOrcMaterialInfo();
   const total=ultimoOrcamento?fmt(ultimoOrcamento.total):'R$ 0,00';
@@ -1704,8 +1768,14 @@ function populateSelect(selId, arr, valKey, labelKey, selectedVal) {
 }
 
 function updateSelects() {
-  ['mv-cliente','op-cliente'].forEach(id => { const el=document.getElementById(id); if(el&&el.tagName==='SELECT') populateSelect(id, clientes, 'id', 'nome'); });
-  ['mv-vendedor','orc-vendedor','op-vendedor'].forEach(id => { const el=document.getElementById(id); if(el) populateSelect(id, vendedores, 'id', 'nome'); });
+  ['mv-cliente'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.tagName==='SELECT') populateSelect(id, clientes, 'id', 'nome');
+  });
+  ['mv-vendedor','orc-vendedor','op-vendedor'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) populateSelect(id, vendedores, 'id', 'nome');
+  });
 }
 
 // ===== INIT =====
@@ -1715,7 +1785,7 @@ function init() {
 }
 
 init();
-  setTab('dashboard');
+setTab('dashboard');
 </script>
 </body>
 </html>
