@@ -124,7 +124,7 @@ nav{padding:8px 0;flex:1}
 .sub-tab{padding:6px 14px;border-radius:6px;border:none;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;background:#e0e4ea;color:var(--txt);transition:all .15s}
 .sub-tab.active{background:var(--blue);color:#fff}
 
-/* ESTOQUE TREE */
+/* PRODUTOS TREE */
 .tree-item{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:13px}
 .tree-item:last-child{border-bottom:none}
 .tree-child{padding-left:28px;background:#fafbfc}
@@ -185,7 +185,7 @@ nav{padding:8px 0;flex:1}
     <div class="nav-item" onclick="setTab('vendas')"><span class="ni">🛒</span> Vendas</div>
     <div class="nav-item" onclick="setTab('orcamento')"><span class="ni">📋</span> Orçamento</div>
     <div class="nav-item" onclick="setTab('clientes')"><span class="ni">👥</span> Clientes</div>
-    <div class="nav-item" onclick="setTab('estoque')"><span class="ni">📦</span> Estoque</div>
+    <div class="nav-item" onclick="setTab('produtos')"><span class="ni">📦</span> Produtos</div>
     <div class="nav-item" onclick="setTab('producao')"><span class="ni">📄</span> Produção</div>
     <div class="nav-item" onclick="setTab('config')"><span class="ni">⚙️</span> Configurações</div>
   </nav>
@@ -596,8 +596,8 @@ nav{padding:8px 0;flex:1}
     </div>
   </div>
 
-  <!-- ===== ESTOQUE ===== -->
-  <div id="tab-estoque" class="tab-content">
+  <!-- ===== PRODUTOS ===== -->
+  <div id="tab-produtos" class="tab-content">
     <div class="content">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <!-- GRUPOS -->
@@ -612,9 +612,9 @@ nav{padding:8px 0;flex:1}
         <!-- PRODUTOS -->
         <div class="card">
           <div class="card-header">🏷 Produtos/Serviços
-            <button class="btn btn-green" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-estoque-prod')">+ Novo Produto</button>
+            <button class="btn btn-green" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-produtos-prod')">+ Novo Produto</button>
           </div>
-          <div class="card-body" style="padding:0" id="estoque-prod-lista">
+          <div class="card-body" style="padding:0" id="produtos-prod-lista">
             <div class="empty-state">Nenhum produto cadastrado.</div>
           </div>
         </div>
@@ -816,7 +816,7 @@ nav{padding:8px 0;flex:1}
   </div>
 </div>
 
-<!-- MODAL GRUPO ESTOQUE -->
+<!-- MODAL GRUPO PRODUTOS -->
 <div class="modal-overlay" id="modal-grupo">
   <div class="modal">
     <h3 id="modal-grupo-title">Novo Grupo</h3>
@@ -829,8 +829,8 @@ nav{padding:8px 0;flex:1}
   </div>
 </div>
 
-<!-- MODAL PRODUTO ESTOQUE -->
-<div class="modal-overlay" id="modal-estoque-prod">
+<!-- MODAL PRODUTO PRODUTOS -->
+<div class="modal-overlay" id="modal-produtos-prod">
   <div class="modal">
     <h3 id="modal-ep-title">Novo Produto/Serviço</h3>
     <input type="hidden" id="mep-id">
@@ -852,8 +852,8 @@ nav{padding:8px 0;flex:1}
     </div>
     <button class="btn btn-gray" style="width:100%;margin-top:8px;font-size:12px" onclick="addMpRow()">+ Adicionar matéria prima</button>
     <div class="modal-actions">
-      <button class="btn btn-gray" onclick="closeModal('modal-estoque-prod')">Cancelar</button>
-      <button class="btn btn-green" onclick="salvarEstoqueProd()">Salvar</button>
+      <button class="btn btn-gray" onclick="closeModal('modal-produtos-prod')">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarProdutosProd()">Salvar</button>
     </div>
   </div>
 </div>
@@ -905,9 +905,9 @@ function setTab(tab) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const titles = {dashboard:'Painel inicial',financeiro:'Gerente Financeiro',vendas:'Vendas',orcamento:'Orçamento',clientes:'Clientes',estoque:'Estoque',producao:'Produção',config:'Configurações'};
+  const titles = {dashboard:'Painel inicial',financeiro:'Gerente Financeiro',vendas:'Vendas',orcamento:'Orçamento',clientes:'Clientes',produtos:'Produtos',producao:'Produção',config:'Configurações'};
   document.getElementById('topbar-title').textContent = titles[tab] || tab;
-  const renders = {dashboard:renderDashboard, financeiro:renderFinanceiro, vendas:renderVendas, clientes:renderClientes, estoque:renderEstoque, config:renderConfig};
+  const renders = {dashboard:renderDashboard, financeiro:renderFinanceiro, vendas:renderVendas, clientes:renderClientes, produtos:renderProdutos, config:renderConfig};
   if (renders[tab]) renders[tab]();
 }
 
@@ -1269,8 +1269,8 @@ function abrirTrello() {
   window.open(url, '_blank');
 }
 
-// ===== ESTOQUE =====
-function renderEstoque() {
+// ===== PRODUTOS =====
+function renderProdutos() {
   // Grupos
   const gl = document.getElementById('grupos-lista');
   if (!gruposEst.length) { gl.innerHTML = '<div class="empty-state">Nenhum grupo cadastrado.</div>'; }
@@ -1283,7 +1283,7 @@ function renderEstoque() {
       </div>`).join('');
   }
   // Produtos
-  const pl = document.getElementById('estoque-prod-lista');
+  const pl = document.getElementById('produtos-prod-lista');
   if (!prodsEst.length) { pl.innerHTML = '<div class="empty-state">Nenhum produto cadastrado.</div>'; }
   else {
     pl.innerHTML = prodsEst.map(p=>{
@@ -1294,8 +1294,8 @@ function renderEstoque() {
           <div style="font-weight:500">${p.nome}</div>
           <span style="font-size:11px;color:var(--blue)">${fmt(p.preco)} / ${p.unid}</span>
         </div>
-        <button class="act-btn act-edit" onclick="editarEstoqueProd('${p.id}')">✏</button>
-        <button class="act-btn act-del" onclick="excluirEstoqueProd('${p.id}')">✕</button>
+        <button class="act-btn act-edit" onclick="editarProdutosProd('${p.id}')">✏</button>
+        <button class="act-btn act-del" onclick="excluirProdutosProd('${p.id}')">✕</button>
         <button class="act-btn" style="color:var(--muted);font-size:11px" onclick="verMP('${p.id}')">🔩 MP</button>
       </div>`;
     }).join('');
@@ -1320,7 +1320,7 @@ function salvarGrupo() {
   if (id) { const idx = gruposEst.findIndex(g=>g.id===id); if(idx>=0) gruposEst[idx]=obj; } else gruposEst.push(obj);
   save('gmp_grupos', gruposEst);
   closeModal('modal-grupo');
-  renderEstoque();
+  renderProdutos();
 }
 function editarGrupo(id) {
   const g = gruposEst.find(g=>g.id===id);
@@ -1334,7 +1334,7 @@ function excluirGrupo(id) {
   if (!confirm('Remover este grupo?')) return;
   gruposEst = gruposEst.filter(g=>g.id!==id);
   save('gmp_grupos', gruposEst);
-  renderEstoque();
+  renderProdutos();
 }
 
 function addMpRow() {
@@ -1349,7 +1349,7 @@ function removeMpRow(btn) {
   if (rows.length > 1) btn.parentElement.remove();
 }
 
-function salvarEstoqueProd() {
+function salvarProdutosProd() {
   const id = document.getElementById('mep-id').value;
   const mpRows = document.querySelectorAll('#mp-inputs .mp-row');
   const mp = [];
@@ -1360,10 +1360,10 @@ function salvarEstoqueProd() {
   const obj = { id:id||uid(), grupoId:document.getElementById('mep-grupo').value, subgrupo:document.getElementById('mep-subgrupo').value, nome:document.getElementById('mep-nome').value||'Produto', preco:parseFloat(document.getElementById('mep-preco').value)||0, unid:document.getElementById('mep-unid').value, mp };
   if (id) { const idx = prodsEst.findIndex(p=>p.id===id); if(idx>=0) prodsEst[idx]=obj; } else prodsEst.push(obj);
   save('gmp_prods', prodsEst);
-  closeModal('modal-estoque-prod');
-  renderEstoque();
+  closeModal('modal-produtos-prod');
+  renderProdutos();
 }
-function editarEstoqueProd(id) {
+function editarProdutosProd(id) {
   const p = prodsEst.find(p=>p.id===id);
   if (!p) return;
   document.getElementById('modal-ep-title').textContent = 'Editar Produto';
@@ -1383,13 +1383,13 @@ function editarEstoqueProd(id) {
     div.innerHTML = `<input class="fi fi-sm" style="flex:1" placeholder="Material" value="${m.nome}"><input class="fi fi-sm" style="width:80px" type="number" placeholder="Qtd" value="${m.qtd}"><button class="btn btn-gray" style="padding:4px 8px;font-size:12px" onclick="removeMpRow(this)">✕</button>`;
     container.appendChild(div);
   });
-  openModal('modal-estoque-prod');
+  openModal('modal-Produtos-prod');
 }
-function excluirEstoqueProd(id) {
+function excluirProdutosProd(id) {
   if (!confirm('Remover este produto?')) return;
   prodsEst = prodsEst.filter(p=>p.id!==id);
   save('gmp_prods', prodsEst);
-  renderEstoque();
+  renderProdutos();
 }
 function populateGrupoSelect(selectedId) {
   const sel = document.getElementById('mep-grupo');
