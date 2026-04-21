@@ -646,20 +646,59 @@ nav{padding:8px 0;flex:1}
   </div>
 
   <!-- ===== CONFIGURAÇÕES ===== -->
-  <div id="tab-config" class="tab-content">
-    <div class="content">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div id="tab-config" class="tab-content">
+  <div class="content">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
 
-        <!-- VENDEDORES -->
-        <div class="card">
-          <div class="card-header">👤 Vendedores
-            <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-vendedor')">+ Novo Vendedor</button>
-          </div>
-          <div class="card-body" style="padding:0">
-            <table class="tbl"><thead><tr><th>Nome</th><th>Comissão %</th><th></th></tr></thead>
-            <tbody id="tbody-vendedores"><tr><td colspan="3" class="empty-state">Nenhum vendedor cadastrado.</td></tr></tbody></table>
-          </div>
+      <!-- VENDEDORES -->
+      <div class="card">
+        <div class="card-header">👤 Vendedores
+          <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-vendedor')">+ Novo Vendedor</button>
         </div>
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Comissão %</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-vendedores">
+              <tr>
+                <td colspan="3" class="empty-state">Nenhum vendedor cadastrado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONFIG GERAL -->
+      <div class="card">
+        <div class="card-header">⚙ Configurações Gerais</div>
+        <div class="card-body">
+
+          <label>Trello</label>
+          <input id="cfg-trello" type="text">
+
+          <label>Logo</label>
+          <input id="cfg-logo" type="text">
+
+          <label>Mão de obra (%)</label>
+          <input id="cfg-mao-obra" type="number">
+
+          <label>Matéria (%)</label>
+          <input id="cfg-materia" type="number">
+
+          <label>Terceiro (%)</label>
+          <input id="cfg-terceiro" type="number">
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
         <!-- TRELLO -->
         <div class="card">
@@ -1220,13 +1259,19 @@ function excluirCliente(id) {
 // ===== VENDEDORES =====
 function renderConfig() {
   const tbody = document.getElementById('tbody-vendedores');
-  if (!vendedores.length) { tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum vendedor cadastrado.</td></tr>'; }
-  else tbody.innerHTML = vendedores.map(v=>`<tr>
-    <td><strong>${v.nome}</strong></td><td>${v.com||0}%</td>
-    <td>
-      <button class="act-btn act-edit" onclick="editarVendedor('${v.id}')">✏</button>
-      <button class="act-btn act-del" onclick="excluirVendedor('${v.id}')">✕</button>
-    </td></tr>`).join('');
+  if (!tbody) return;
+
+  if (!vendedores.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum vendedor cadastrado.</td></tr>';
+  } else {
+    tbody.innerHTML = vendedores.map(v=>`<tr>
+      <td><strong>${v.nome}</strong></td><td>${v.com||0}%</td>
+      <td>
+        <button class="act-btn act-edit" onclick="editarVendedor('${v.id}')">✏</button>
+        <button class="act-btn act-del" onclick="excluirVendedor('${v.id}')">✕</button>
+      </td></tr>`).join('');
+  }
+
   document.getElementById('cfg-trello').value = cfg.trello||'';
   document.getElementById('cfg-logo').value = cfg.logo||'';
   document.getElementById('cfg-mao-obra').value = cfg.maoObra||0;
