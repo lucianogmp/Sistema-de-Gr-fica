@@ -1487,22 +1487,91 @@ function orcProdToVenda() {
 }
 
 function calcAdesivo() {
-  const l = parseFloat(document.getElementById('orc-largura').value)||0;
-  const a = parseFloat(document.getElementById('orc-altura').value)||0;
-  const qtd = parseInt(document.getElementById('orc-qtd').value)||1;
-  const preco = parseFloat(document.getElementById('orc-material').value)||0;
-  const temArte = document.getElementById('arte-sim').checked;
-  const m2u = (l/100)*(a/100);
-  const arte = temArte?30:0;
-  const unit = m2u*preco+arte;
-  const total = unit*qtd;
-  ultimoOrcamento = {total, nome:'Adesivo/Banner', qtd};
-  document.getElementById('res-area').textContent = (m2u*qtd).toFixed(2)+' m²';
-  document.getElementById('res-unit').textContent = fmt(unit);
-  document.getElementById('res-total').textContent = fmt(total);
-  const mat = document.getElementById('orc-material').options[document.getElementById('orc-material').selectedIndex].text.split('—')[0].trim();
-  document.getElementById('res-detalhe').textContent = `${l}cm × ${a}cm × ${qtd} un. | ${mat}${temArte?' | Arte incluída':''}`;
-  document.getElementById('btn-converter').style.display = total>0?'block':'none';
+  // Captura segura dos elementos
+  const elL = document.getElementById('orc-largura');
+  const elA = document.getElementById('orc-altura');
+  const elQtd = document.getElementById('orc-qtd');
+  const elMat = document.getElementById('orc-material');
+  const elArte = document.getElementById('arte-sim');
+
+  // Verificação básica (evita quebra)
+  if (!elL || !elA || !elQtd || !elMat) {
+    console.error('Elementos do formulário não encontrados.');
+    return;
+  }
+
+  // Conversões seguras
+  const l = parseFloat(elL.value) || 0;
+  const a = parseFloat(elA.value) || 0;
+  const qtd = parseInt(elQtd.value) || 1;
+
+  // ⚠️ Aqui é o ponto crítico (value precisa ser número no HTML)
+  const preco = parseFloat(elMat.value);
+  if (isNaN(preco)) {
+    console.warn('Preço do material inválido. Verifique o value do select.');
+  }
+
+  const temArte = elArte ? elArte.checked : false;
+
+  // Validação mínima (evita cálculo vazio)
+  if (l <= 0 || a <= 0) {
+    document.getElementById('res-area').textContent = '0,00 m²';
+    document.getElementById('res-unit').textContent = 'R$ 0,00';
+    document.getElementById('res-total').textContent = 'R$ 0,00';
+    document.getElementById('res-detalhe').textContent = 'Preencha largura e altura.';
+    document.getElementById('btn-converter').style.display = 'none';
+    return;
+  }
+
+  // Cálculo
+  const m2u = (l / 100) * (a / 100);
+  const arte = temArte ? 30 : 0;
+  const unit = (m2u * (preco || 0)) + arte;
+  const total = unit * qtd;
+
+  // Salva último orçamento
+  ultimoOrcamento = {
+    total,
+    nome: 'Adesivo/Banner',
+    qtd
+  };
+
+  // Atualiza UI (com verificação)
+  const elArea = document.getElementById('res-area');
+  const elUnit = document.getElementById('res-unit');
+  const elTotal = document.getElementById('res-total');
+  const elDet = document.getElementById('res-detalhe');
+  const elBtn = document.getElementById('btn-converter');
+
+  if (elArea) elArea.textContent = (m2u * qtd).toFixed(2) + ' m²';
+  if (elUnit) elUnit.textContent = fmt(unit);
+  if (elTotal) elTotal.textContent = fmt(total);
+
+  // Nome do material (seguro)
+  let mat = 'Material';
+  if (elMat.selectedIndex >= 0) {
+    const txt = elMat.options[elMat.selectedIndex].text;
+    mat = txt.split('—')[0].trim();
+  }
+
+  if (elDet) {
+    elDet.textContent = `${l}cm × ${a}cm × ${qtd} un. | ${mat}${temArte ? ' | Arte incluída' : ''}`;
+  }
+
+  if (elBtn) {
+    elBtn.style.display = total > 0 ? 'block' : 'none';
+  }
+
+  // Debug útil (pode remover depois)
+  console.log({
+    largura: l,
+    altura: a,
+    qtd,
+    preco,
+    m2u,
+    unit,
+    total
+  });
 }
 
 function salvarOrcamento() {
