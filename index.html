@@ -180,14 +180,14 @@ nav{padding:8px 0;flex:1}
     <div class="sb-logo-text">Gráfica <span>Master Print</span></div>
   </div>
   <nav>
-    <div class="nav-item active" onclick="setTab('dashboard')"><span class="ni">📊</span> Dashboard</div>
-    <div class="nav-item" onclick="setTab('financeiro')"><span class="ni">💰</span> Ger. Financeiro</div>
-    <div class="nav-item" onclick="setTab('vendas')"><span class="ni">🛒</span> Vendas</div>
-    <div class="nav-item" onclick="setTab('orcamento')"><span class="ni">📋</span> Orçamento</div>
-    <div class="nav-item" onclick="setTab('clientes')"><span class="ni">👥</span> Clientes</div>
-    <div class="nav-item" onclick="setTab('produtos')"><span class="ni">📦</span> Produtos</div>
-    <div class="nav-item" onclick="setTab('producao')"><span class="ni">📄</span> Produção</div>
-    <div class="nav-item" onclick="setTab('config')"><span class="ni">⚙️</span> Configurações</div>
+    <div class="nav-item active" data-tab="dashboard" onclick="setTab('dashboard')"><span class="ni">📊</span> Dashboard</div>
+    <div class="nav-item" data-tab="financeiro" onclick="setTab('financeiro')"><span class="ni">💰</span> Ger. Financeiro</div>
+    <div class="nav-item" data-tab="vendas" onclick="setTab('vendas')"><span class="ni">🛒</span> Vendas</div>
+    <div class="nav-item" data-tab="orcamento" onclick="setTab('orcamento')"><span class="ni">📋</span> Orçamento</div>
+    <div class="nav-item" data-tab="clientes" onclick="setTab('clientes')"><span class="ni">👥</span> Clientes</div>
+    <div class="nav-item" data-tab="produtos" onclick="setTab('produtos')"><span class="ni">📦</span> Produtos</div>
+    <div class="nav-item" data-tab="producao" onclick="setTab('producao')"><span class="ni">📄</span> Produção</div>
+    <div class="nav-item" data-tab="config" onclick="setTab('config')"><span class="ni">⚙️</span> Configurações</div>
   </nav>
 </div>
 
@@ -902,13 +902,17 @@ function fmtDate(d) { if(!d) return '—'; return d.split('-').reverse().join('/
 
 // ===== NAVIGATION =====
 function setTab(tab) {
+  const safeTab = document.getElementById('tab-'+tab) ? tab : 'dashboard';
+  if (safeTab !== tab) console.warn(`Tab "${tab}" não encontrada. Voltando para "dashboard".`);
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('tab-'+safeTab).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const activeNav = document.querySelector(`.nav-item[data-tab="${safeTab}"]`);
+  if (activeNav) activeNav.classList.add('active');
   const titles = {dashboard:'Painel inicial',financeiro:'Gerente Financeiro',vendas:'Vendas',orcamento:'Orçamento',clientes:'Clientes',produtos:'Produtos',producao:'Produção',config:'Configurações'};
-  document.getElementById('topbar-title').textContent = titles[tab] || tab;
+  document.getElementById('topbar-title').textContent = titles[safeTab] || safeTab;
   const renders = {dashboard:renderDashboard, financeiro:renderFinanceiro, vendas:renderVendas, clientes:renderClientes, produtos:renderProdutos, config:renderConfig};
-  if (renders[tab]) renders[tab]();
+  if (renders[safeTab]) renders[safeTab]();
 }
 
 // ===== MODALS =====
