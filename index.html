@@ -429,13 +429,11 @@ nav{padding:8px 0;flex:1}
             </div>
             <div class="card-body">
               <div class="form-row form-row-2" style="margin-bottom:10px">
-                <div><label class="fl">Cliente</label><<input id="op-cliente" class="fi" list="lista-clientes" placeholder="Nome do cliente">
-<datalist id="lista-clientes"></datalist></div>
+                <div><label class="fl">Cliente</label><input id="op-cliente" class="fi" placeholder="Nome do cliente"></div>
                 <div><label class="fl">Vendedor</label><select id="op-vendedor" class="fi"><option value="">Selecionar...</option></select></div>
               </div>
               <div><label class="fl">Produto/Serviço</label>
-                <input id="op-produto" class="fi" list="lista-produtos" oninput="calcProduto()" placeholder="Digite o produto">
-<datalist id="lista-produtos"></datalist>
+                <select id="op-produto" class="fi" onchange="calcProduto()" style="margin-bottom:10px">
                   <option value="">Selecionar produto...</option>
                 </select>
               </div>
@@ -879,22 +877,6 @@ nav{padding:8px 0;flex:1}
 <script>
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  function updateAutoCompleteOrc() {
-  const dlClientes = document.getElementById('lista-clientes');
-  if (dlClientes) {
-    dlClientes.innerHTML = clientes.map(c =>
-      `<option value="${c.nome}">`
-    ).join('');
-  }
-
-  const dlProd = document.getElementById('lista-produtos');
-  if (dlProd) {
-    dlProd.innerHTML = prodsOrc.map(p =>
-      `<option value="${p.nome}">`
-    ).join('');
-  }
-}
-  
 // STATE
 let vendas       = load('gmp_vendas') || [];
 let clientes     = load('gmp_clientes') || [];
@@ -1503,31 +1485,13 @@ function excluirProdOrc(id) {
 }
 
 function calcProduto() {
-  const nome = document.getElementById('op-produto').value;
-  const nomeNorm = normalizar(nome);
-
-  const p = prodsOrc.find(p => normalizar(p.nome) === nomeNorm)
-         || prodsOrc.find(p => normalizar(p.nome).includes(nomeNorm));
-
-  // 👇 PASSO 3 AQUI
-  if (p && nome !== p.nome) {
-    document.getElementById('op-produto').value = p.nome;
-  }
-
-  if (!p) {
-    ['op-res-area','op-res-unit','op-res-total']
-      .forEach(id=>document.getElementById(id).textContent='—');
-    return;
-  }
-
+  const pid = document.getElementById('op-produto').value;
+  const p = prodsOrc.find(p=>p.id===pid);
+  if (!p) { ['op-res-area','op-res-unit','op-res-total'].forEach(id=>document.getElementById(id).textContent='—'); return; }
   const qtd = parseInt(document.getElementById('op-qtd').value)||1;
-
-  const temArte = document.getElementById('op-arte').value === "0";
-  const arte = temArte ? 0 : 30;
-
+  const arte = parseFloat(document.getElementById('op-arte').value)||0;
   let unit = p.preco;
   let area = '—';
-
   if (p.m2==='sim') {
     const l = parseFloat(document.getElementById('op-larg').value)||0;
     const a = parseFloat(document.getElementById('op-alt').value)||0;
@@ -1535,17 +1499,14 @@ function calcProduto() {
     unit = m2 * p.preco;
     area = m2.toFixed(2) + ' m²';
   }
-
   unit += arte;
-
   const total = unit * qtd;
-
   ultimoOrcamento = {total, nome:p.nome, qtd};
-
   document.getElementById('op-res-area').textContent = area;
   document.getElementById('op-res-unit').textContent = fmt(unit);
   document.getElementById('op-res-total').textContent = fmt(total);
 }
+
 function salvarOrcProduto() {
   if (!ultimoOrcamento) { alert('Calcule o orçamento primeiro.'); return; }
   const item = {
@@ -1751,18 +1712,10 @@ function updateSelects() {
 function init() {
   applyLogo();
   updateSelects();
-  updateAutoCompleteOrc();
 }
 
 init();
   setTab('dashboard');
-
-  function normalizar(txt) {
-  return txt
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
 </script>
 </body>
 </html>
