@@ -1265,18 +1265,29 @@ function renderConfig() {
     tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum vendedor cadastrado.</td></tr>';
   } else {
     tbody.innerHTML = vendedores.map(v=>`<tr>
-      <td><strong>${v.nome}</strong></td><td>${v.com||0}%</td>
+      <td><strong>${v.nome}</strong></td>
+      <td>${v.com||0}%</td>
       <td>
         <button class="act-btn act-edit" onclick="editarVendedor('${v.id}')">✏</button>
         <button class="act-btn act-del" onclick="excluirVendedor('${v.id}')">✕</button>
-      </td></tr>`).join('');
+      </td>
+    </tr>`).join('');
   }
 
-  document.getElementById('cfg-trello').value = cfg.trello||'';
-  document.getElementById('cfg-logo').value = cfg.logo||'';
-  document.getElementById('cfg-mao-obra').value = cfg.maoObra||0;
-  document.getElementById('cfg-materia').value = cfg.materia||0;
-  document.getElementById('cfg-terceiro').value = cfg.terceiro||0;
+  const trello = document.getElementById('cfg-trello');
+  if (trello) trello.value = cfg.trello||'';
+
+  const logo = document.getElementById('cfg-logo');
+  if (logo) logo.value = cfg.logo||'';
+
+  const mao = document.getElementById('cfg-mao-obra');
+  if (mao) mao.value = cfg.maoObra||0;
+
+  const mat = document.getElementById('cfg-materia');
+  if (mat) mat.value = cfg.materia||0;
+
+  const ter = document.getElementById('cfg-terceiro');
+  if (ter) ter.value = cfg.terceiro||0;
 }
 function salvarVendedor() {
   const id = document.getElementById('mven-id').value;
