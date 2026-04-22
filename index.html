@@ -191,8 +191,8 @@ nav{padding:8px 0;flex:1}
   <nav>
     <div class="nav-item active" data-tab="dashboard" onclick="setTab('dashboard')"><span class="ni">📊</span> Dashboard</div>
     <div class="nav-item" data-tab="financeiro" onclick="setTab('financeiro')"><span class="ni">💰</span> Ger. Financeiro</div>
-    <div class="nav-item" data-tab="vendas" onclick="setTab('vendas')"><span class="ni">🛒</span> Vendas</div>
     <div class="nav-item" data-tab="orcamento" onclick="setTab('orcamento')"><span class="ni">📋</span> Orçamento</div>
+    <div class="nav-item" data-tab="vendas" onclick="setTab('vendas')"><span class="ni">🛒</span> Vendas</div>
     <div class="nav-item" data-tab="clientes" onclick="setTab('clientes')"><span class="ni">👥</span> Clientes</div>
     <div class="nav-item" data-tab="produtos" onclick="setTab('produtos')"><span class="ni">📦</span> Produtos</div>
     <div class="nav-item" data-tab="producao" onclick="setTab('producao')"><span class="ni">📄</span> Produção</div>
@@ -207,7 +207,7 @@ nav{padding:8px 0;flex:1}
       <span class="topbar-title" id="topbar-title">Painel inicial</span>
     </div>
     <div class="topbar-actions">
-      <button class="btn btn-blue" onclick="openModal('modal-venda')">+ Nova Venda</button>
+      <button class="btn btn-blue" onclick="novaVenda()">+ Nova Venda</button>
       <button class="btn btn-green" onclick="setTab('orcamento')">📋 Orçamento</button>
     </div>
   </div>
@@ -402,12 +402,15 @@ nav{padding:8px 0;flex:1}
   <div id="tab-vendas" class="tab-content">
     <div class="content">
       <div class="card">
-        <div class="card-header">🛒 Registrar nova venda
-          <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-venda')">+ Nova Venda</button>
+        <div class="card-header">🛒 Vendas registradas
+          <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="novaVenda()">+ Nova Venda</button>
+        </div>
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+          <input id="vendas-busca" class="fi" style="max-width:360px" placeholder="🔍 Buscar por cliente, descrição, status, vendedor..." oninput="renderVendas()">
         </div>
         <div class="card-body" style="padding:0">
           <table class="tbl" id="tbl-vendas">
-            <thead><tr><th>#</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Custo</th><th>Lucro</th><th>Status</th><th>Vendedor</th><th>Mês</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Data</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Custo</th><th>Lucro</th><th>Status</th><th>Vendedor</th><th></th></tr></thead>
             <tbody id="tbody-vendas"><tr><td colspan="10" class="empty-state">Nenhuma venda registrada.</td></tr></tbody>
           </table>
         </div>
@@ -437,13 +440,16 @@ nav{padding:8px 0;flex:1}
               <div class="form-row form-row-2" style="margin-bottom:10px">
                 <div>
                   <label class="fl">Cliente</label>
-                  <div class="autocomplete-wrap" id="op-cliente-wrap">
-                    <input id="op-cliente" class="fi" placeholder="Buscar cliente..." autocomplete="off"
-                      oninput="acSearch('op-cliente','op-cliente-id','clientes')"
-                      onfocus="acSearch('op-cliente','op-cliente-id','clientes')"
-                      onblur="setTimeout(()=>acHide('op-cliente'),180)">
-                    <input type="hidden" id="op-cliente-id">
-                    <div class="autocomplete-list" id="op-cliente-list" style="display:none"></div>
+                  <div style="display:flex;gap:5px;align-items:flex-start">
+                    <div class="autocomplete-wrap" style="flex:1" id="op-cliente-wrap">
+                      <input id="op-cliente" class="fi" placeholder="Buscar cliente..." autocomplete="off"
+                        oninput="acSearch('op-cliente','op-cliente-id','clientes')"
+                        onfocus="acSearch('op-cliente','op-cliente-id','clientes')"
+                        onblur="setTimeout(()=>acHide('op-cliente'),180)">
+                      <input type="hidden" id="op-cliente-id">
+                      <div class="autocomplete-list" id="op-cliente-list" style="display:none"></div>
+                    </div>
+                    <button class="btn btn-blue" style="padding:6px 10px;font-size:15px;line-height:1;flex-shrink:0" title="Cadastrar novo cliente" onclick="openAddClienteFrom('op-cliente','op-cliente-id')">+</button>
                   </div>
                 </div>
                 <div><label class="fl">Vendedor</label><select id="op-vendedor" class="fi"><option value="">Selecionar...</option></select></div>
@@ -496,13 +502,16 @@ nav{padding:8px 0;flex:1}
               <div class="form-row form-row-2">
                 <div>
                   <div class="orc-label">Nome do cliente</div>
-                  <div class="autocomplete-wrap">
-                    <input id="orc-cliente" class="orc-input" placeholder="Buscar cliente..." autocomplete="off"
-                      oninput="acSearch('orc-cliente','orc-cliente-id','clientes'); acAutoFillTel()"
-                      onfocus="acSearch('orc-cliente','orc-cliente-id','clientes')"
-                      onblur="setTimeout(()=>acHide('orc-cliente'),180)">
-                    <input type="hidden" id="orc-cliente-id">
-                    <div class="autocomplete-list" id="orc-cliente-list" style="display:none"></div>
+                  <div style="display:flex;gap:5px;align-items:flex-start">
+                    <div class="autocomplete-wrap" style="flex:1">
+                      <input id="orc-cliente" class="orc-input" placeholder="Buscar cliente..." autocomplete="off"
+                        oninput="acSearch('orc-cliente','orc-cliente-id','clientes'); acAutoFillTel()"
+                        onfocus="acSearch('orc-cliente','orc-cliente-id','clientes')"
+                        onblur="setTimeout(()=>acHide('orc-cliente'),180)">
+                      <input type="hidden" id="orc-cliente-id">
+                      <div class="autocomplete-list" id="orc-cliente-list" style="display:none"></div>
+                    </div>
+                    <button class="btn btn-blue" style="padding:6px 10px;font-size:15px;line-height:1;flex-shrink:0" title="Cadastrar novo cliente" onclick="openAddClienteFrom('orc-cliente','orc-cliente-id')">+</button>
                   </div>
                 </div>
                 <div>
@@ -734,19 +743,68 @@ nav{padding:8px 0;flex:1}
 
 <!-- MODAL VENDA -->
 <div class="modal-overlay" id="modal-venda">
-  <div class="modal">
+  <div class="modal" style="width:520px">
     <h3 id="modal-venda-title">Nova Venda</h3>
     <input type="hidden" id="mv-id">
+
+    <!-- CLIENTE + VENDEDOR -->
     <div class="form-row form-row-2" style="margin-bottom:10px">
-      <div><label class="fl">Cliente</label><select id="mv-cliente" class="fi"><option value="">Selecionar...</option></select></div>
+      <div>
+        <label class="fl">Cliente</label>
+        <div style="display:flex;gap:5px;align-items:flex-start">
+          <div class="autocomplete-wrap" style="flex:1">
+            <input id="mv-cliente-search" class="fi" placeholder="Buscar cliente..." autocomplete="off"
+              oninput="acSearch('mv-cliente-search','mv-cliente-id','clientes')"
+              onfocus="acSearch('mv-cliente-search','mv-cliente-id','clientes')"
+              onblur="setTimeout(()=>acHide('mv-cliente-search'),180)">
+            <input type="hidden" id="mv-cliente-id">
+            <div class="autocomplete-list" id="mv-cliente-search-list" style="display:none"></div>
+          </div>
+          <button class="btn btn-blue" style="padding:6px 10px;font-size:15px;line-height:1;flex-shrink:0" title="Cadastrar novo cliente" onclick="openAddClienteFrom('mv-cliente-search','mv-cliente-id')">+</button>
+        </div>
+      </div>
       <div><label class="fl">Vendedor</label><select id="mv-vendedor" class="fi"><option value="">Selecionar...</option></select></div>
     </div>
-    <div style="margin-bottom:10px"><label class="fl">Descrição do serviço</label><input id="mv-desc" class="fi" placeholder="Ex: Banner 2x1m"></div>
+
+    <!-- PRODUTO (opcional) -->
+    <div style="margin-bottom:8px">
+      <label class="fl">Produto/Serviço <span style="color:var(--muted);font-weight:400">(opcional — busca do estoque)</span></label>
+      <div class="autocomplete-wrap">
+        <input id="mv-produto-search" class="fi" placeholder="Buscar produto do estoque..." autocomplete="off"
+          oninput="acSearch('mv-produto-search','mv-produto-id','prodsEst')"
+          onfocus="acSearch('mv-produto-search','mv-produto-id','prodsEst')"
+          onblur="setTimeout(()=>acHide('mv-produto-search'),180)">
+        <input type="hidden" id="mv-produto-id">
+        <div class="autocomplete-list" id="mv-produto-search-list" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- QUANTIDADE + DIMS m² -->
+    <div class="form-row form-row-2" style="margin-bottom:8px">
+      <div><label class="fl">Quantidade</label><input id="mv-qtd" type="number" step="0.01" min="0.01" class="fi" value="1" oninput="calcVendaModal()"></div>
+      <div id="mv-preco-ref-wrap" style="display:none">
+        <label class="fl">Preço referência</label>
+        <div class="fi" id="mv-preco-ref" style="background:#f8f9fa;color:var(--muted);cursor:default">—</div>
+      </div>
+    </div>
+    <div id="mv-dims-wrap" class="form-row form-row-2" style="display:none;margin-bottom:8px">
+      <div><label class="fl">Largura (cm)</label><input id="mv-larg" type="number" step="0.1" class="fi" placeholder="cm" oninput="calcVendaModal()"></div>
+      <div><label class="fl">Altura (cm)</label><input id="mv-alt" type="number" step="0.1" class="fi" placeholder="cm" oninput="calcVendaModal()"></div>
+    </div>
+
+    <!-- DESCRIÇÃO -->
+    <div style="margin-bottom:8px">
+      <label class="fl">Descrição do pedido</label>
+      <input id="mv-desc" class="fi" placeholder="Ex: Banner 2x1m, frente e verso, com instalação...">
+    </div>
+
+    <!-- VALOR + CUSTO + STATUS -->
     <div class="form-row form-row-3" style="margin-bottom:10px">
-      <div><label class="fl">Valor (R$)</label><input id="mv-valor" type="number" class="fi" placeholder="0,00"></div>
+      <div><label class="fl">Valor (R$)</label><input id="mv-valor" type="number" step="0.01" class="fi" placeholder="0,00"></div>
       <div><label class="fl">Custo (R$)</label><input id="mv-custo" type="number" class="fi" placeholder="0,00"></div>
       <div><label class="fl">Status</label><select id="mv-status" class="fi"><option value="pago">Pago</option><option value="pendente">Pendente</option></select></div>
     </div>
+
     <div class="modal-actions">
       <button class="btn btn-gray" onclick="closeModal('modal-venda')">Cancelar</button>
       <button class="btn btn-blue" onclick="salvarVenda()">Salvar</button>
@@ -971,9 +1029,12 @@ function acSelect(inputId, hiddenId, id, nome, sourceName) {
 
   // Ações pós-seleção
   if (sourceName === 'prodsEst') {
-    calcProduto();
+    if (inputId === 'mv-produto-search') {
+      onMvProdutoSelected(id);
+    } else {
+      calcProduto();
+    }
   } else if (sourceName === 'clientes') {
-    // Preenche telefone automaticamente no adesivo/banner
     acAutoFillTel();
   }
 }
@@ -1193,20 +1254,32 @@ function excluirConta(id) {
 // ===== VENDAS =====
 function renderVendas() {
   const tbody = document.getElementById('tbody-vendas');
-  if (!vendas.length) { tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Nenhuma venda registrada.</td></tr>'; return; }
-  tbody.innerHTML = vendas.slice().reverse().map((v,i)=>{
+  const busca = (document.getElementById('vendas-busca')?.value||'').toLowerCase().trim();
+  let lista = vendas.slice().reverse();
+  if (busca) {
+    lista = lista.filter(v => {
+      const cli = clientes.find(c=>c.id===v.clienteId);
+      const ven = vendedores.find(vd=>vd.id===v.vendedorId);
+      return (cli?.nome||v.clienteNome||'').toLowerCase().includes(busca)
+        || (v.desc||'').toLowerCase().includes(busca)
+        || (v.status||'').toLowerCase().includes(busca)
+        || (ven?.nome||v.vendedorNome||'').toLowerCase().includes(busca);
+    });
+  }
+  if (!lista.length) { tbody.innerHTML = `<tr><td colspan="10" class="empty-state">${busca?'Nenhum resultado encontrado.':'Nenhuma venda registrada.'}</td></tr>`; return; }
+  tbody.innerHTML = lista.map((v,i)=>{
     const luc = v.valor - v.custo;
     const cli = clientes.find(c=>c.id===v.clienteId);
     const ven = vendedores.find(vd=>vd.id===v.vendedorId);
     return `<tr>
-      <td style="color:var(--muted)">${vendas.length-i}</td>
+      <td style="color:var(--muted)">${vendas.indexOf(v)+1}</td>
+      <td style="white-space:nowrap;color:var(--muted);font-size:12px">${v.data||'—'}</td>
       <td>${cli?cli.nome:(v.clienteNome||'—')}</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.desc||'—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.desc||'—'}</td>
       <td>${fmt(v.valor)}</td><td>${fmt(v.custo)}</td>
       <td style="color:${luc>=0?'var(--green)':'var(--red)'}">${fmt(luc)}</td>
       <td><span class="tag ${v.status==='pago'?'tag-green':'tag-orange'}">${v.status}</span></td>
       <td>${ven?ven.nome:(v.vendedorNome||'—')}</td>
-      <td>${MESES[v.mes]}</td>
       <td>
         <button class="act-btn act-edit" onclick="editarVenda('${v.id}')">✏</button>
         <button class="act-btn act-del" onclick="excluirVenda('${v.id}')">✕</button>
@@ -1214,23 +1287,81 @@ function renderVendas() {
   }).join('');
 }
 
+// ===== NOVA VENDA (abre modal limpo) =====
+function novaVenda() {
+  document.getElementById('modal-venda-title').textContent = 'Nova Venda';
+  document.getElementById('mv-id').value = '';
+  document.getElementById('mv-cliente-search').value = '';
+  document.getElementById('mv-cliente-id').value = '';
+  document.getElementById('mv-produto-search').value = '';
+  document.getElementById('mv-produto-id').value = '';
+  document.getElementById('mv-qtd').value = '1';
+  document.getElementById('mv-larg').value = '';
+  document.getElementById('mv-alt').value = '';
+  document.getElementById('mv-dims-wrap').style.display = 'none';
+  document.getElementById('mv-preco-ref-wrap').style.display = 'none';
+  document.getElementById('mv-desc').value = '';
+  document.getElementById('mv-valor').value = '';
+  document.getElementById('mv-custo').value = '';
+  document.getElementById('mv-status').value = 'pendente';
+  populateSelect('mv-vendedor', vendedores, 'id', 'nome');
+  openModal('modal-venda');
+}
+
+// ===== PRODUTO SELECIONADO NO MODAL VENDA =====
+function onMvProdutoSelected(id) {
+  const p = prodsEst.find(p=>p.id===id);
+  if (!p) return;
+  const dimsWrap = document.getElementById('mv-dims-wrap');
+  const precoRef = document.getElementById('mv-preco-ref-wrap');
+  const precoRefVal = document.getElementById('mv-preco-ref');
+  if (p.unid === 'm2') {
+    dimsWrap.style.display = 'grid';
+    precoRef.style.display = 'block';
+    precoRefVal.textContent = `${fmt(p.preco)} / m²`;
+  } else {
+    dimsWrap.style.display = 'none';
+    precoRef.style.display = 'block';
+    precoRefVal.textContent = `${fmt(p.preco)} / ${p.unid||'un'}`;
+  }
+  calcVendaModal();
+}
+
+// ===== CALCULAR VALOR NO MODAL VENDA (tempo real) =====
+function calcVendaModal() {
+  const pid = document.getElementById('mv-produto-id').value;
+  const p = prodsEst.find(p=>p.id===pid);
+  if (!p) return;
+  const qtd = parseFloat(document.getElementById('mv-qtd').value)||1;
+  let unit = p.preco;
+  if (p.unid === 'm2') {
+    const l = parseFloat(document.getElementById('mv-larg').value)||0;
+    const a = parseFloat(document.getElementById('mv-alt').value)||0;
+    const m2 = (l/100)*(a/100);
+    unit = m2 * p.preco;
+  }
+  const total = unit * qtd;
+  document.getElementById('mv-valor').value = total > 0 ? total.toFixed(2) : '';
+}
+
 function salvarVenda() {
-  const id = document.getElementById('mv-id').value;
-  const mv = document.getElementById('mv-vendedor').value;
-  const mc = document.getElementById('mv-cliente').value;
+  const id  = document.getElementById('mv-id').value;
+  const mv  = document.getElementById('mv-vendedor').value;
+  const mc  = document.getElementById('mv-cliente-id').value;
   const cli = clientes.find(c=>c.id===mc);
   const ven = vendedores.find(v=>v.id===mv);
   const obj = {
     id: id || uid(),
-    clienteId: mc, clienteNome: cli?cli.nome:mc,
-    vendedorId: mv, vendedorNome: ven?ven.nome:mv,
+    clienteId: mc, clienteNome: cli ? cli.nome : document.getElementById('mv-cliente-search').value,
+    vendedorId: mv, vendedorNome: ven ? ven.nome : mv,
     desc: document.getElementById('mv-desc').value,
     valor: parseFloat(document.getElementById('mv-valor').value)||0,
     custo: parseFloat(document.getElementById('mv-custo').value)||0,
     status: document.getElementById('mv-status').value,
-    mes: new Date().getMonth()
+    mes: new Date().getMonth(),
+    data: new Date().toLocaleDateString('pt-BR')
   };
-  if (id) { const idx = vendas.findIndex(v=>v.id===id); if(idx>=0) vendas[idx]=obj; }
+  if (id) { const idx = vendas.findIndex(v=>v.id===id); if(idx>=0) { obj.data = vendas[idx].data||obj.data; vendas[idx]=obj; } }
   else vendas.push(obj);
   save('gmp_vendas', vendas);
   closeModal('modal-venda');
@@ -1242,11 +1373,22 @@ function editarVenda(id) {
   if (!v) return;
   document.getElementById('modal-venda-title').textContent = 'Editar Venda';
   document.getElementById('mv-id').value = v.id;
+  // Cliente
+  const cli = clientes.find(c=>c.id===v.clienteId);
+  document.getElementById('mv-cliente-search').value = cli ? cli.nome : (v.clienteNome||'');
+  document.getElementById('mv-cliente-id').value = v.clienteId||'';
+  // Produto (limpa — não repopula na edição)
+  document.getElementById('mv-produto-search').value = '';
+  document.getElementById('mv-produto-id').value = '';
+  document.getElementById('mv-dims-wrap').style.display = 'none';
+  document.getElementById('mv-preco-ref-wrap').style.display = 'none';
+  document.getElementById('mv-qtd').value = '1';
+  document.getElementById('mv-larg').value = '';
+  document.getElementById('mv-alt').value = '';
   document.getElementById('mv-desc').value = v.desc||'';
   document.getElementById('mv-valor').value = v.valor;
   document.getElementById('mv-custo').value = v.custo;
   document.getElementById('mv-status').value = v.status;
-  populateSelect('mv-cliente', clientes, 'id', 'nome', v.clienteId);
   populateSelect('mv-vendedor', vendedores, 'id', 'nome', v.vendedorId);
   openModal('modal-venda');
 }
@@ -1259,6 +1401,25 @@ function excluirVenda(id) {
 }
 
 // ===== CLIENTES =====
+let afterSaveCliente = null; // callback após salvar cliente (usado pelo botão "+")
+
+function openAddClienteFrom(inputId, hiddenId) {
+  afterSaveCliente = function(cli) {
+    const inp = document.getElementById(inputId);
+    const hid = document.getElementById(hiddenId);
+    if (inp) inp.value = cli.nome;
+    if (hid) hid.value = cli.id;
+    if (inputId === 'orc-cliente') acAutoFillTel();
+  };
+  document.getElementById('mc-id').value = '';
+  document.getElementById('mc-nome').value = '';
+  document.getElementById('mc-tel').value = '';
+  document.getElementById('mc-doc').value = '';
+  document.getElementById('mc-end').value = '';
+  document.getElementById('modal-cliente-title').textContent = 'Novo Cliente';
+  openModal('modal-cliente');
+}
+
 function renderClientes() {
   const tbody = document.getElementById('tbody-clientes');
   if (!clientes.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum cliente cadastrado.</td></tr>'; return; }
@@ -1278,6 +1439,8 @@ function salvarCliente() {
   closeModal('modal-cliente');
   renderClientes();
   updateSelects();
+  // Callback do botão "+" (se houver)
+  if (afterSaveCliente) { afterSaveCliente(obj); afterSaveCliente = null; }
 }
 function editarCliente(id) {
   const c = clientes.find(c=>c.id===id);
@@ -1591,13 +1754,37 @@ function salvarOrcProduto() {
 
 function orcProdToVenda() {
   if (!ultimoOrcamento) { alert('Calcule o orçamento primeiro.'); return; }
-  document.getElementById('mv-desc').value = ultimoOrcamento.nome;
-  document.getElementById('mv-valor').value = ultimoOrcamento.total;
-  document.getElementById('mv-custo').value = (ultimoOrcamento.total * 0.6).toFixed(2);
-  document.getElementById('mv-status').value = 'pendente';
+  const clienteId   = document.getElementById('op-cliente-id').value;
+  const clienteNome = document.getElementById('op-cliente').value || '';
+  const vendedorId  = document.getElementById('op-vendedor').value;
+  const cli = clientes.find(c=>c.id===clienteId);
+  const ven = vendedores.find(v=>v.id===vendedorId);
+  const pid = document.getElementById('op-produto-id').value;
+  const p   = prodsEst.find(p=>p.id===pid);
+  const qtd = document.getElementById('op-qtd').value || '1';
+  // Monta descrição com detalhes do orçamento
+  const descOrc = `${ultimoOrcamento.nome}${qtd>1?' | Qtd: '+qtd:''}`;
+
   document.getElementById('modal-venda-title').textContent = 'Nova Venda (do Orçamento)';
-  populateSelect('mv-cliente', clientes, 'id', 'nome');
-  populateSelect('mv-vendedor', vendedores, 'id', 'nome');
+  document.getElementById('mv-id').value = '';
+  // Cliente
+  document.getElementById('mv-cliente-search').value = cli ? cli.nome : clienteNome;
+  document.getElementById('mv-cliente-id').value = clienteId;
+  // Vendedor
+  populateSelect('mv-vendedor', vendedores, 'id', 'nome', vendedorId);
+  // Produto
+  if (p) {
+    document.getElementById('mv-produto-search').value = p.nome;
+    document.getElementById('mv-produto-id').value = p.id;
+    document.getElementById('mv-preco-ref-wrap').style.display = 'block';
+    document.getElementById('mv-preco-ref').textContent = `${fmt(p.preco)} / ${p.unid||'un'}`;
+    document.getElementById('mv-dims-wrap').style.display = 'none';
+  }
+  document.getElementById('mv-qtd').value = qtd;
+  document.getElementById('mv-desc').value = descOrc;
+  document.getElementById('mv-valor').value = ultimoOrcamento.total.toFixed(2);
+  document.getElementById('mv-custo').value = '';
+  document.getElementById('mv-status').value = 'pendente';
   openModal('modal-venda');
 }
 
@@ -1678,16 +1865,35 @@ function limparOrcamento() {
 // ALTERAÇÃO 4: orcToVenda já preenche cliente e pega telefone do cadastro
 function orcToVenda() {
   if (!ultimoOrcamento) return;
-  const clienteId = document.getElementById('orc-cliente-id').value;
+  const clienteId   = document.getElementById('orc-cliente-id').value;
   const clienteNome = document.getElementById('orc-cliente').value || '';
-  document.getElementById('mv-desc').value = 'Adesivo/Banner';
-  document.getElementById('mv-valor').value = ultimoOrcamento.total;
-  document.getElementById('mv-custo').value = (ultimoOrcamento.total * 0.6).toFixed(2);
-  document.getElementById('mv-status').value = 'pendente';
+  const vendedorId  = document.getElementById('orc-vendedor').value;
+  const cli = clientes.find(c => c.id === clienteId);
+  const l   = document.getElementById('orc-largura').value || '0';
+  const a   = document.getElementById('orc-altura').value  || '0';
+  const qtd = document.getElementById('orc-qtd').value     || '1';
+  const { nome: mat } = getOrcMaterialInfo();
+  // Monta descrição completa do orçamento
+  const descOrc = `Adesivo/Banner | ${mat} | ${l}×${a}cm | Qtd: ${qtd}`;
+
   document.getElementById('modal-venda-title').textContent = 'Nova Venda (do Orçamento)';
-  populateSelect('mv-cliente', clientes, 'id', 'nome', clienteId);
-  populateSelect('mv-vendedor', vendedores, 'id', 'nome',
-    document.getElementById('orc-vendedor').value);
+  document.getElementById('mv-id').value = '';
+  // Cliente — preenche autocomplete com dados do orçamento
+  document.getElementById('mv-cliente-search').value = cli ? cli.nome : clienteNome;
+  document.getElementById('mv-cliente-id').value = clienteId;
+  // Vendedor
+  populateSelect('mv-vendedor', vendedores, 'id', 'nome', vendedorId);
+  // Produto/dimensões — esconde (é adesivo, sem produto do estoque)
+  document.getElementById('mv-produto-search').value = '';
+  document.getElementById('mv-produto-id').value = '';
+  document.getElementById('mv-dims-wrap').style.display = 'none';
+  document.getElementById('mv-preco-ref-wrap').style.display = 'none';
+  // Detalhes do pedido
+  document.getElementById('mv-qtd').value = qtd;
+  document.getElementById('mv-desc').value = descOrc;
+  document.getElementById('mv-valor').value = ultimoOrcamento.total.toFixed(2);
+  document.getElementById('mv-custo').value = '';
+  document.getElementById('mv-status').value = 'pendente';
   openModal('modal-venda');
 }
 
@@ -1768,10 +1974,7 @@ function populateSelect(selId, arr, valKey, labelKey, selectedVal) {
 }
 
 function updateSelects() {
-  ['mv-cliente'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el && el.tagName==='SELECT') populateSelect(id, clientes, 'id', 'nome');
-  });
+  // mv-cliente agora é autocomplete — não usa populateSelect
   ['mv-vendedor','orc-vendedor','op-vendedor'].forEach(id => {
     const el = document.getElementById(id);
     if (el) populateSelect(id, vendedores, 'id', 'nome');
