@@ -1,3 +1,14 @@
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/esm/index.js';
+
+  const SUPABASE_URL = 'https://<project-ref>.supabase.co';
+  const SUPABASE_ANON_KEY = '<SUPABASE_ANON_KEY>';
+
+  window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
+</script>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -947,16 +958,119 @@ nav{padding:8px 0;flex:1}
   </div>
 </div>
 
+  
+
 <script>
+
+  async function supFetchFinanceiro() {
+  // RECEBER
+  const { data: recData, error: recErr } = await window.supabase
+    .from('receber')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (recErr) throw recErr;
+
+  // PAGAR
+  const { data: pagData, error: pagErr } = await window.supabase
+    .from('pagar')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (pagErr) throw pagErr;
+
+  // CONTAS
+  const { data: contaData, error: cErr } = await window.supabase
+    .from('contas')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (cErr) throw cErr;
+
+  // ✅ Normaliza para o SEU render atual continuar usando `item.desc`
+  receber = (recData || []).map(r => ({ ...r, desc: r.descricao }));
+  pagar   = (pagData || []).map(p => ({ ...p, desc: p.descricao }));
+  contas  = (contaData || []);
+}
+
+async function excluirFinanceiro(id, tipo) {
+  const table = tipo === 'rec' ? 'receber' : 'pagar';
+  const { error } = await window.supabase.from(table).delete().eq('id', id);
+  if (error) { console.error(error); alert('Falha ao excluir.'); return; }
+  renderFinanceiro();
+}
+
+async function quitarFinanceiro(id, tipo) {
+  const table = tipo === 'rec' ? 'receber' : 'pagar';
+  const status = tipo === 'rec' ? 'recebido' : 'pago';
+
+  const { error } = await window.supabase
+    .from(table)
+    .update({ status })
+    .eq('id', id);
+
+  if (error) { console.error(error); alert('Falha ao quitar.'); return; }
+  renderFinanceiro();
+}
+
+async function salvarReceber() {
+  const payload = {
+    descricao: document.getElementById('mrec-desc')?.value || 'Recebimento',
+    valor: parseFloat(document.getElementById('mrec-valor')?.value) || 0,
+    venc: document.getElementById('mrec-venc')?.value || null,
+    status: document.getElementById('mrec-status')?.value || 'pendente',
+  };
+
+  const { error } = await window.supabase.from('receber').insert(payload);
+  if (error) { console.error(error); alert('Falha ao salvar recebimento.'); return; }
+
+  closeModal('modal-receber');
+  renderFinanceiro();
+}
+
+async function salvarPagar() {
+  const payload = {
+    descricao: document.getElementById('mpag-desc')?.value || 'Despesa',
+    valor: parseFloat(document.getElementById('mpag-valor')?.value) || 0,
+    venc: document.getElementById('mpag-venc')?.value || null,
+    status: document.getElementById('mpag-status')?.value || 'pendente',
+  };
+
+  const { error } = await window.supabase.from('pagar').insert(payload);
+  if (error) { console.error(error); alert('Falha ao salvar despesa.'); return; }
+
+  closeModal('modal-pagar');
+  renderFinanceiro();
+}
+
+async function salvarConta() {
+  const payload = {
+    nome: document.getElementById('mct-nome')?.value || 'Conta',
+    tipo: document.getElementById('mct-tipo')?.value || 'geral',
+    saldo: parseFloat(document.getElementById('mct-saldo')?.value) || 0,
+  };
+
+  const { error } = await window.supabase.from('contas').insert(payload);
+  if (error) { console.error(error); alert('Falha ao salvar conta.'); return; }
+
+  closeModal('modal-conta');
+  renderFinanceiro();
+}
+
+async function excluirConta(id) {
+  const { error } = await window.supabase.from('contas').delete().eq('id', id);
+  if (error) { console.error(error); alert('Falha ao excluir conta.'); return; }
+  renderFinanceiro();
+}
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 // STATE
 let vendas       = load('gmp_vendas') || [];
 let clientes     = load('gmp_clientes') || [];
 let vendedores   = load('gmp_vendedores') || [];
-let receber      = load('gmp_receber') || [];
-let pagar        = load('gmp_pagar') || [];
-let contas       = load('gmp_contas') || [];
+let receber = [];
+let pagar = [];
+let contas = [];
 let gruposEst    = load('gmp_grupos') || [];
 let prodsEst     = load('gmp_prods') || [];
 let prodsOrc     = load('gmp_prods_orc') || [];
