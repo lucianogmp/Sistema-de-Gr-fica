@@ -135,7 +135,7 @@ nav{padding:8px 0;flex:1}
 .sub-tab{padding:6px 14px;border-radius:6px;border:none;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;background:#e0e4ea;color:var(--txt);transition:all .15s}
 .sub-tab.active{background:var(--blue);color:#fff}
 
-/* PRODUTOS TREE */
+/*  TREE */
 .tree-item{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:13px}
 .tree-item:last-child{border-bottom:none}
 .tree-child{padding-left:28px;background:#fafbfc}
@@ -205,7 +205,7 @@ nav{padding:8px 0;flex:1}
     <div class="nav-item" data-tab="orcamento" onclick="setTab('orcamento')"><span class="ni">📋</span> Orçamento</div>
     <div class="nav-item" data-tab="vendas" onclick="setTab('vendas')"><span class="ni">🛒</span> Vendas</div>
     <div class="nav-item" data-tab="clientes" onclick="setTab('clientes')"><span class="ni">👥</span> Clientes</div>
-    <div class="nav-item" data-tab="produtos" onclick="setTab('produtos')"><span class="ni">📦</span> Produtos</div>
+    <div class="nav-item" data-tab="" onclick="setTab('')"><span class="ni">📦</span> </div>
     <div class="nav-item" data-tab="producao" onclick="setTab('producao')"><span class="ni">📄</span> Produção</div>
     <div class="nav-item" data-tab="config" onclick="setTab('config')"><span class="ni">⚙️</span> Configurações</div>
   </nav>
@@ -433,16 +433,16 @@ nav{padding:8px 0;flex:1}
   <div id="tab-orcamento" class="tab-content">
     <div class="content">
       <div class="sub-tabs">
-        <button class="sub-tab active" id="orc-tab-produtos" onclick="setOrcTab('produtos')">🛍 Produtos/Serviços</button>
+        <button class="sub-tab active" id="orc-tab-" onclick="setOrcTab('')">🛍 /Serviços</button>
         <button class="sub-tab" id="orc-tab-adesivo" onclick="setOrcTab('adesivo')">📐 Adesivo/Banner</button>
         <button class="sub-tab" id="orc-tab-folha" onclick="setOrcTab('folha')">🗂 Aproveitamento de Folha</button>
         <button class="sub-tab" id="orc-tab-hist" onclick="setOrcTab('hist')">📋 Histórico</button>
       </div>
 
-      <!-- PRODUTOS/SERVIÇOS -->
+      <!-- /SERVIÇOS -->
       <!-- ALTERAÇÃO 1 e 2: campo produto com busca (prodsEst), campo cliente com busca (clientes) -->
       <!-- ALTERAÇÃO 3: Removidos largura, altura e arte inclusa -->
-      <div id="orc-produtos">
+      <div id="orc-">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div class="card">
             <div class="card-header">🛍 Calcular produto/serviço</div>
@@ -493,7 +493,7 @@ nav{padding:8px 0;flex:1}
             </div>
           </div>
           <div class="card">
-            <div class="card-header">📋 Produtos do estoque</div>
+            <div class="card-header">📋  do estoque</div>
             <div class="card-body" style="padding:0">
               <div id="prod-lista"><div class="empty-state">Nenhum produto cadastrado.</div></div>
             </div>
@@ -659,12 +659,12 @@ nav{padding:8px 0;flex:1}
     </div>
   </div>
 
-  <!-- ===== PRODUTOS ===== -->
-  <div id="tab-produtos" class="tab-content">
+  <!-- =====  ===== -->
+  <div id="tab-" class="tab-content">
     <div class="content">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div class="card">
-          <div class="card-header">📦 Grupos de produtos
+          <div class="card-header">📦 Grupos de 
             <button class="btn btn-blue" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-grupo')">+ Novo Grupo</button>
           </div>
           <div class="card-body" style="padding:0" id="grupos-lista">
@@ -672,10 +672,10 @@ nav{padding:8px 0;flex:1}
           </div>
         </div>
         <div class="card">
-          <div class="card-header">🏷 Produtos/Serviços
-            <button class="btn btn-green" style="font-size:11px;padding:4px 10px" onclick="openModal('modal-produtos-prod')">+ Novo Produto</button>
+          <div class="card-header">🏷 /Serviços
+            <button class="btn btn-green" style="font-size:11px;padding:4px 10px" onclick="openModal('modal--prod')">+ Novo Produto</button>
           </div>
-          <div class="card-body" style="padding:0" id="produtos-prod-lista">
+          <div class="card-body" style="padding:0" id="-prod-lista">
             <div class="empty-state">Nenhum produto cadastrado.</div>
           </div>
         </div>
@@ -916,7 +916,7 @@ nav{padding:8px 0;flex:1}
   </div>
 </div>
 
-<!-- MODAL GRUPO PRODUTOS -->
+<!-- MODAL GRUPO  -->
 <div class="modal-overlay" id="modal-grupo">
   <div class="modal">
     <h3 id="modal-grupo-title">Novo Grupo</h3>
@@ -929,8 +929,8 @@ nav{padding:8px 0;flex:1}
   </div>
 </div>
 
-<!-- MODAL PRODUTO PRODUTOS -->
-<div class="modal-overlay" id="modal-produtos-prod">
+<!-- MODAL PRODUTO  -->
+<div class="modal-overlay" id="modal--prod">
   <div class="modal">
     <h3 id="modal-ep-title">Novo Produto/Serviço</h3>
     <input type="hidden" id="mep-id">
@@ -952,8 +952,8 @@ nav{padding:8px 0;flex:1}
     </div>
     <button class="btn btn-gray" style="width:100%;margin-top:8px;font-size:12px" onclick="addMpRow()">+ Adicionar matéria prima</button>
     <div class="modal-actions">
-      <button class="btn btn-gray" onclick="closeModal('modal-produtos-prod')">Cancelar</button>
-      <button class="btn btn-green" onclick="salvarProdutosProd()">Salvar</button>
+      <button class="btn btn-gray" onclick="closeModal('modal--prod')">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarProd()">Salvar</button>
     </div>
   </div>
 </div>
@@ -963,34 +963,40 @@ nav{padding:8px 0;flex:1}
 <script>
 
   async function supFetchFinanceiro() {
-  // RECEBER
   const { data: recData, error: recErr } = await window.supabase
     .from('receber')
     .select('*')
     .order('created_at', { ascending: false });
-
   if (recErr) throw recErr;
 
-  // PAGAR
   const { data: pagData, error: pagErr } = await window.supabase
     .from('pagar')
     .select('*')
     .order('created_at', { ascending: false });
-
   if (pagErr) throw pagErr;
 
-  // CONTAS
   const { data: contaData, error: cErr } = await window.supabase
     .from('contas')
     .select('*')
     .order('created_at', { ascending: false });
-
   if (cErr) throw cErr;
 
-  // ✅ Normaliza para o SEU render atual continuar usando `item.desc`
-  receber = (recData || []).map(r => ({ ...r, desc: r.descricao }));
-  pagar   = (pagData || []).map(p => ({ ...p, desc: p.descricao }));
-  contas  = (contaData || []);
+  receber = (recData || []).map(r => ({
+    ...r,
+    desc: r.descricao,
+    valor: Number(r.valor ?? 0),
+  }));
+
+  pagar = (pagData || []).map(p => ({
+    ...p,
+    desc: p.descricao,
+    valor: Number(p.valor ?? 0),
+  }));
+
+  contas = (contaData || []).map(c => ({
+    ...c,
+    saldo: Number(c.saldo ?? 0),
+  }));
 }
 
 async function excluirFinanceiro(id, tipo) {
@@ -1119,7 +1125,7 @@ function acSearch(inputId, hiddenId, sourceName) {
     list.innerHTML = '<div class="autocomplete-item empty">Nenhum resultado</div>';
   } else {
     list.innerHTML = filtered.map(item => {
-      // Detalhe extra: preço para produtos, telefone para clientes
+      // Detalhe extra: preço para , telefone para clientes
       let detail = '';
       if (sourceName === 'prodsEst') {
         detail = `<span style="font-size:11px;color:var(--blue);margin-left:6px">${fmt(item.preco)} / ${item.unid||'un'}</span>`;
@@ -1258,110 +1264,276 @@ function renderDashboard() {
 }
 
 // ===== FINANCEIRO =====
+async function supFetchFinanceiro() {
+  // RECEBER
+  const { data: recData, error: recErr } = await window.supabase
+    .from('receber')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (recErr) throw recErr;
+
+  // PAGAR
+  const { data: pagData, error: pagErr } = await window.supabase
+    .from('pagar')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (pagErr) throw pagErr;
+
+  // CONTAS
+  const { data: contaData, error: cErr } = await window.supabase
+    .from('contas')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (cErr) throw cErr;
+
+  // Normaliza tipos (numeric -> Number)
+  receber = (recData || []).map(r => ({
+    ...r,
+    desc: r.descricao,
+    valor: Number(r.valor ?? 0),
+  }));
+
+  pagar = (pagData || []).map(p => ({
+    ...p,
+    desc: p.descricao,
+    valor: Number(p.valor ?? 0),
+  }));
+
+  contas = (contaData || []).map(c => ({
+    ...c,
+    saldo: Number(c.saldo ?? 0),
+  }));
+}
+
 function renderFinanceiro() {
-  const totalRec = receber.filter(r=>r.status==='pendente').reduce((a,r)=>a+r.valor,0);
-  const totalPag = pagar.filter(p=>p.status==='pendente').reduce((a,p)=>a+p.valor,0);
+  const totalRec = receber
+    .filter(r => r.status === 'pendente')
+    .reduce((a, r) => a + Number(r.valor || 0), 0);
+
+  const totalPag = pagar
+    .filter(p => p.status === 'pendente')
+    .reduce((a, p) => a + Number(p.valor || 0), 0);
+
   const fluxo = totalRec - totalPag;
-  const saldo = contas.reduce((a,c)=>a+c.saldo,0);
+  const saldo = contas.reduce((a, c) => a + Number(c.saldo || 0), 0);
 
   document.getElementById('f-receber').textContent = fmt(totalRec);
-  document.getElementById('f-receber-qtd').textContent = receber.filter(r=>r.status==='pendente').length + ' lançamentos';
+  document.getElementById('f-receber-qtd').textContent =
+    receber.filter(r => r.status === 'pendente').length + ' lançamentos';
+
   document.getElementById('f-pagar').textContent = fmt(totalPag);
-  document.getElementById('f-pagar-qtd').textContent = pagar.filter(p=>p.status==='pendente').length + ' lançamentos';
+  document.getElementById('f-pagar-qtd').textContent =
+    pagar.filter(p => p.status === 'pendente').length + ' lançamentos';
+
   document.getElementById('f-fluxo').textContent = fmt(fluxo);
-  document.getElementById('f-fluxo').className = 'fin-card-val ' + (fluxo>=0?'fin-positive':'fin-negative');
+  document.getElementById('f-fluxo').className =
+    'fin-card-val ' + (fluxo >= 0 ? 'fin-positive' : 'fin-negative');
+
   document.getElementById('f-saldo').textContent = fmt(saldo);
-  document.getElementById('f-saldo-sub').textContent = contas.length + ' conta(s) cadastrada(s)';
+  document.getElementById('f-saldo-sub').textContent =
+    contas.length + ' conta(s) cadastrada(s)';
 
   const cl = document.getElementById('f-contas-lista');
-  if (!contas.length) { cl.innerHTML = '<div class="empty-state">Nenhuma conta cadastrada.</div>'; }
-  else {
-    const icons = {pix:'💳',dinheiro:'💵',credito:'💳',debito:'💳',banco:'🏦'};
-    cl.innerHTML = contas.map(c=>`
+  if (!contas.length) {
+    cl.innerHTML = '<div class="empty-state">Nenhuma conta cadastrada.</div>';
+  } else {
+    const icons = { pix: '💳', dinheiro: '💵', credito: '💳', debito: '💳', banco: '🏦' };
+    cl.innerHTML = contas.map(c => `
       <div class="conta-item">
-        <div class="conta-nome"><div class="conta-icon" style="background:#e8f4fd">${icons[c.tipo]||'💰'}</div><div><div>${c.nome}</div><div style="font-size:11px;color:var(--muted)">${c.tipo}</div></div></div>
+        <div class="conta-nome">
+          <div class="conta-icon" style="background:#e8f4fd">${icons[c.tipo] || '💰'}</div>
+          <div>
+            <div>${c.nome}</div>
+            <div style="font-size:11px;color:var(--muted)">${c.tipo}</div>
+          </div>
+        </div>
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-weight:600;color:${c.saldo>=0?'var(--green)':'var(--red)'}">${fmt(c.saldo)}</span>
+          <span style="font-weight:600;color:${Number(c.saldo || 0) >= 0 ? 'var(--green)' : 'var(--red)'}">
+            ${fmt(c.saldo)}
+          </span>
           <button class="act-btn act-del" onclick="excluirConta('${c.id}')">✕</button>
         </div>
-      </div>`).join('');
+      </div>
+    `).join('');
   }
 
   renderTabelaFinanceiro();
 
   const mesesRec = Array(12).fill(0);
   const mesesPag = Array(12).fill(0);
-  receber.forEach(r => { const m = r.venc ? new Date(r.venc).getMonth() : new Date().getMonth(); mesesRec[m] += r.valor; });
-  pagar.forEach(p => { const m = p.venc ? new Date(p.venc).getMonth() : new Date().getMonth(); mesesPag[m] += p.valor; });
 
-  if (fluxoChart) { fluxoChart.data.datasets[0].data = mesesRec; fluxoChart.data.datasets[1].data = mesesPag; fluxoChart.update(); }
-  else {
+  receber.forEach(r => {
+    const m = r.venc ? new Date(r.venc).getMonth() : new Date().getMonth();
+    mesesRec[m] += Number(r.valor || 0);
+  });
+
+  pagar.forEach(p => {
+    const m = p.venc ? new Date(p.venc).getMonth() : new Date().getMonth();
+    mesesPag[m] += Number(p.valor || 0);
+  });
+
+  if (fluxoChart) {
+    fluxoChart.data.datasets[0].data = mesesRec;
+    fluxoChart.data.datasets[1].data = mesesPag;
+    fluxoChart.update();
+  } else {
     fluxoChart = new Chart(document.getElementById('fluxoChart'), {
-      type:'bar',
-      data:{labels:MESES,datasets:[{label:'A Receber',data:mesesRec,backgroundColor:'#27ae60',borderRadius:4},{label:'A Pagar',data:mesesPag,backgroundColor:'#e74c3c',borderRadius:4}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'Sora',size:11}}}},scales:{y:{beginAtZero:true,grid:{color:'#f0f2f5'},ticks:{font:{family:'Sora',size:11}}},x:{grid:{display:false},ticks:{font:{family:'Sora',size:11}}}}}
+      type: 'bar',
+      data: {
+        labels: MESES,
+        datasets: [
+          { label: 'A Receber', data: mesesRec, backgroundColor: '#27ae60', borderRadius: 4 },
+          { label: 'A Pagar', data: mesesPag, backgroundColor: '#e74c3c', borderRadius: 4 },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { font: { family: 'Sora', size: 11 } } } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { font: { family: 'Sora', size: 11 } } },
+          x: { grid: { display: false }, ticks: { font: { family: 'Sora', size: 11 } } },
+        },
+      },
     });
   }
 }
 
 function renderTabelaFinanceiro() {
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
-  const mkTag = (s,tipo) => {
-    if (tipo==='rec') return s==='recebido'?`<span class="tag tag-green">Recebido</span>`:`<span class="tag tag-orange">Pendente</span>`;
-    return s==='pago'?`<span class="tag tag-green">Pago</span>`:`<span class="tag tag-orange">Pendente</span>`;
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const mkTag = (s, tipo) => {
+    if (tipo === 'rec')
+      return s === 'recebido'
+        ? `<span class="tag tag-green">Recebido</span>`
+        : `<span class="tag tag-orange">Pendente</span>`;
+    return s === 'pago'
+      ? `<span class="tag tag-green">Pago</span>`
+      : `<span class="tag tag-orange">Pendente</span>`;
   };
-  const mkRow = (item, tipo) => `<tr>
-    <td>${item.desc}</td><td>${fmt(item.valor)}</td><td>${fmtDate(item.venc)}</td>
-    <td>${mkTag(item.status,tipo)}</td>
-    <td><button class="act-btn act-del" onclick="excluirFinanceiro('${item.id}','${tipo}')">✕</button>
-    <button class="act-btn act-edit" style="font-size:11px;padding:2px 6px" onclick="quitarFinanceiro('${item.id}','${tipo}')">✓ Quitar</button></td></tr>`;
+
+  const mkRow = (item, tipo) => `
+    <tr>
+      <td>${item.desc}</td>
+      <td>${fmt(item.valor)}</td>
+      <td>${fmtDate(item.venc)}</td>
+      <td>${mkTag(item.status, tipo)}</td>
+      <td>
+        <button class="act-btn act-del" onclick="excluirFinanceiro('${item.id}','${tipo}')">✕</button>
+        <button class="act-btn act-edit" style="font-size:11px;padding:2px 6px" onclick="quitarFinanceiro('${item.id}','${tipo}')">✓ Quitar</button>
+      </td>
+    </tr>
+  `;
 
   document.getElementById('tbody-receber').innerHTML = receber.length
-    ? receber.map(r=>mkRow(r,'rec')).join('') : '<tr><td colspan="5" class="empty-state">Nenhum lançamento.</td></tr>';
+    ? receber.map(r => mkRow(r, 'rec')).join('')
+    : '<tr><td colspan="5" class="empty-state">Nenhum lançamento.</td></tr>';
+
   document.getElementById('tbody-pagar').innerHTML = pagar.length
-    ? pagar.map(p=>mkRow(p,'pag')).join('') : '<tr><td colspan="5" class="empty-state">Nenhum lançamento.</td></tr>';
+    ? pagar.map(p => mkRow(p, 'pag')).join('')
+    : '<tr><td colspan="5" class="empty-state">Nenhum lançamento.</td></tr>';
 
-  const atrasRec = receber.filter(r=>r.status==='pendente'&&r.venc&&new Date(r.venc)<hoje);
-  const atrasPag = pagar.filter(p=>p.status==='pendente'&&p.venc&&new Date(p.venc)<hoje);
+  const atrasRec = receber.filter(r => r.status === 'pendente' && r.venc && new Date(r.venc) < hoje);
+  const atrasPag = pagar.filter(p => p.status === 'pendente' && p.venc && new Date(p.venc) < hoje);
+
   document.getElementById('tbody-receber-atrasado').innerHTML = atrasRec.length
-    ? atrasRec.map(r=>`<tr><td>${r.desc}</td><td style="color:var(--red)">${fmt(r.valor)}</td><td>${fmtDate(r.venc)}</td></tr>`).join('')
+    ? atrasRec.map(r => `
+        <tr>
+          <td>${r.desc}</td>
+          <td style="color:var(--red)">${fmt(r.valor)}</td>
+          <td>${fmtDate(r.venc)}</td>
+        </tr>
+      `).join('')
     : '<tr><td colspan="3" class="empty-state">Nenhuma em atraso.</td></tr>';
+
   document.getElementById('tbody-pagar-atrasado').innerHTML = atrasPag.length
-    ? atrasPag.map(p=>`<tr><td>${p.desc}</td><td style="color:var(--red)">${fmt(p.valor)}</td><td>${fmtDate(p.venc)}</td></tr>`).join('')
+    ? atrasPag.map(p => `
+        <tr>
+          <td>${p.desc}</td>
+          <td style="color:var(--red)">${fmt(p.valor)}</td>
+          <td>${fmtDate(p.venc)}</td>
+        </tr>
+      `).join('')
     : '<tr><td colspan="3" class="empty-state">Nenhuma em atraso.</td></tr>';
 }
 
-function salvarReceber() {
-  receber.push({ id:uid(), desc:document.getElementById('mrec-desc').value||'Recebimento', valor:parseFloat(document.getElementById('mrec-valor').value)||0, venc:document.getElementById('mrec-venc').value, status:document.getElementById('mrec-status').value });
-  save('gmp_receber', receber);
+// ===== WRITES (agora recarrega do Supabase antes do render) =====
+async function salvarReceber() {
+  const payload = {
+    descricao: document.getElementById('mrec-desc')?.value || 'Recebimento',
+    valor: parseFloat(document.getElementById('mrec-valor')?.value) || 0,
+    venc: document.getElementById('mrec-venc')?.value || null,
+    status: document.getElementById('mrec-status')?.value || 'pendente',
+  };
+
+  const { error } = await window.supabase.from('receber').insert(payload);
+  if (error) { console.error(error); alert('Falha ao salvar recebimento.'); return; }
+
   closeModal('modal-receber');
+
+  await supFetchFinanceiro();
   renderFinanceiro();
 }
-function salvarPagar() {
-  pagar.push({ id:uid(), desc:document.getElementById('mpag-desc').value||'Despesa', valor:parseFloat(document.getElementById('mpag-valor').value)||0, venc:document.getElementById('mpag-venc').value, status:document.getElementById('mpag-status').value });
-  save('gmp_pagar', pagar);
+
+async function salvarPagar() {
+  const payload = {
+    descricao: document.getElementById('mpag-desc')?.value || 'Despesa',
+    valor: parseFloat(document.getElementById('mpag-valor')?.value) || 0,
+    venc: document.getElementById('mpag-venc')?.value || null,
+    status: document.getElementById('mpag-status')?.value || 'pendente',
+  };
+
+  const { error } = await window.supabase.from('pagar').insert(payload);
+  if (error) { console.error(error); alert('Falha ao salvar despesa.'); return; }
+
   closeModal('modal-pagar');
+
+  await supFetchFinanceiro();
   renderFinanceiro();
 }
-function excluirFinanceiro(id, tipo) {
-  if (tipo==='rec') { receber = receber.filter(r=>r.id!==id); save('gmp_receber',receber); }
-  else { pagar = pagar.filter(p=>p.id!==id); save('gmp_pagar',pagar); }
+
+async function excluirFinanceiro(id, tipo) {
+  const table = tipo === 'rec' ? 'receber' : 'pagar';
+  const { error } = await window.supabase.from(table).delete().eq('id', id);
+  if (error) { console.error(error); alert('Falha ao excluir.'); return; }
+
+  await supFetchFinanceiro();
   renderFinanceiro();
 }
-function quitarFinanceiro(id, tipo) {
-  if (tipo==='rec') { const r = receber.find(r=>r.id===id); if(r) r.status='recebido'; save('gmp_receber',receber); }
-  else { const p = pagar.find(p=>p.id===id); if(p) p.status='pago'; save('gmp_pagar',pagar); }
+
+async function quitarFinanceiro(id, tipo) {
+  const table = tipo === 'rec' ? 'receber' : 'pagar';
+  const status = tipo === 'rec' ? 'recebido' : 'pago';
+
+  const { error } = await window.supabase.from(table).update({ status }).eq('id', id);
+  if (error) { console.error(error); alert('Falha ao quitar.'); return; }
+
+  await supFetchFinanceiro();
   renderFinanceiro();
 }
-function salvarConta() {
-  contas.push({ id:uid(), nome:document.getElementById('mct-nome').value||'Conta', tipo:document.getElementById('mct-tipo').value, saldo:parseFloat(document.getElementById('mct-saldo').value)||0 });
-  save('gmp_contas', contas);
+
+async function salvarConta() {
+  const payload = {
+    nome: document.getElementById('mct-nome')?.value || 'Conta',
+    tipo: document.getElementById('mct-tipo')?.value || 'geral',
+    saldo: parseFloat(document.getElementById('mct-saldo')?.value) || 0,
+  };
+
+  const { error } = await window.supabase.from('contas').insert(payload);
+  if (error) { console.error(error); alert('Falha ao salvar conta.'); return; }
+
   closeModal('modal-conta');
+
+  await supFetchFinanceiro();
   renderFinanceiro();
 }
-function excluirConta(id) {
-  contas = contas.filter(c=>c.id!==id);
-  save('gmp_contas', contas);
+
+async function excluirConta(id) {
+  const { error } = await window.supabase.from('contas').delete().eq('id', id);
+  if (error) { console.error(error); alert('Falha ao excluir conta.'); return; }
+
+  await supFetchFinanceiro();
   renderFinanceiro();
 }
 
@@ -1654,26 +1826,81 @@ function renderProducao() {
   }
 }
 
-// ===== PRODUTOS =====
-function renderProdutos() {
+// ===== PRODUTOS (Supabase + org via RPC current_org_id) =====
+
+let gruposEst = [];
+let prodsEst = [];
+
+async function getOrgId() {
+  const { data, error } = await window.supabase.rpc('current_org_id');
+  if (error) {
+    console.error('rpc current_org_id falhou:', error);
+    return null;
+  }
+  return data || null;
+}
+
+async function renderProdutos() {
   const gl = document.getElementById('grupos-lista');
-  if (!gruposEst.length) { gl.innerHTML = '<div class="empty-state">Nenhum grupo cadastrado.</div>'; }
-  else {
-    gl.innerHTML = gruposEst.map(g=>`
+  const pl = document.getElementById('produtos-prod-lista');
+
+  const orgId = await getOrgId();
+  if (!orgId) {
+    gl.innerHTML = '<div class="empty-state">Org não definido.</div>';
+    pl.innerHTML = '<div class="empty-state">Não foi possível determinar a org atual.</div>';
+    return;
+  }
+
+  // GRUPOS
+  const { data: grupos, error: e1 } = await window.supabase
+    .from('grupos_produtos')
+    .select('id, nome, org_id')
+    .eq('org_id', orgId)
+    .order('nome', { ascending: true });
+
+  if (e1) {
+    console.error(e1);
+    gl.innerHTML = '<div class="empty-state">Erro ao carregar grupos.</div>';
+    pl.innerHTML = '<div class="empty-state">Erro ao carregar produtos.</div>';
+    return;
+  }
+
+  gruposEst = grupos || [];
+
+  if (!gruposEst.length) {
+    gl.innerHTML = '<div class="empty-state">Nenhum grupo cadastrado.</div>';
+  } else {
+    gl.innerHTML = gruposEst.map(g => `
       <div class="tree-item">
         <span style="flex:1;font-weight:500">${g.nome}</span>
         <button class="act-btn act-edit" onclick="editarGrupo('${g.id}')">✏</button>
         <button class="act-btn act-del" onclick="excluirGrupo('${g.id}')">✕</button>
       </div>`).join('');
   }
-  const pl = document.getElementById('produtos-prod-lista');
-  if (!prodsEst.length) { pl.innerHTML = '<div class="empty-state">Nenhum produto cadastrado.</div>'; }
-  else {
-    pl.innerHTML = prodsEst.map(p=>{
-      const g = gruposEst.find(gr=>gr.id===p.grupoId);
+
+  // PRODUTOS/EST
+  // (RLS deve ser respeitada via relação com grupos_produtos->org_id)
+  const { data: prods, error: e2 } = await window.supabase
+    .from('prods_est')
+    .select('id, grupo_id, subgrupo, nome, preco, unid, mp')
+    .order('nome', { ascending: true });
+
+  if (e2) {
+    console.error(e2);
+    pl.innerHTML = '<div class="empty-state">Erro ao carregar produtos.</div>';
+    return;
+  }
+
+  prodsEst = prods || [];
+
+  if (!prodsEst.length) {
+    pl.innerHTML = '<div class="empty-state">Nenhum produto cadastrado.</div>';
+  } else {
+    pl.innerHTML = prodsEst.map(p => {
+      const g = gruposEst.find(gr => gr.id === p.grupo_id);
       return `<div class="tree-item">
         <div style="flex:1">
-          <span style="font-size:11px;color:var(--muted)">${g?g.nome:'—'}${p.subgrupo?' › '+p.subgrupo:''}</span>
+          <span style="font-size:11px;color:var(--muted)">${g ? g.nome : '—'}${p.subgrupo ? ' › ' + p.subgrupo : ''}</span>
           <div style="font-weight:500">${p.nome}</div>
           <span style="font-size:11px;color:var(--blue)">${fmt(p.preco)} / ${p.unid}</span>
         </div>
@@ -1683,99 +1910,216 @@ function renderProdutos() {
       </div>`;
     }).join('');
   }
-  document.getElementById('mp-lista').innerHTML = '<div class="empty-state">Clique em 🔩 MP para ver a composição de um produto.</div>';
+
+  document.getElementById('mp-lista').innerHTML =
+    '<div class="empty-state">Clique em 🔩 MP para ver a composição de um produto.</div>';
+
   populateGrupoSelect();
 }
 
 function verMP(id) {
-  const p = prodsEst.find(p=>p.id===id);
+  const p = prodsEst.find(x => x.id === id);
   if (!p) return;
+
   const mpl = document.getElementById('mp-lista');
-  if (!p.mp || !p.mp.length) { mpl.innerHTML = `<div class="empty-state">Produto <strong>${p.nome}</strong> não tem matéria prima cadastrada.</div>`; return; }
-  mpl.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:var(--muted);font-weight:500">Composição de: <strong style="color:var(--txt)">${p.nome}</strong></div>` +
-    p.mp.map(m=>`<div class="tree-item tree-child"><span style="flex:1">${m.nome}</span><span style="color:var(--muted);font-size:12px">${m.qtd} un.</span></div>`).join('');
+
+  // mp será um objeto: { composicao: [...], movimentos: [...] }
+  // Se já existir em outro formato, mostramos fallback.
+  const mpObj = (p.mp && typeof p.mp === 'object') ? p.mp : null;
+  const composicao = mpObj?.composicao || [];
+
+  if (!composicao.length) {
+    mpl.innerHTML = `<div class="empty-state">Produto <strong>${p.nome}</strong> não tem matéria prima cadastrada.</div>`;
+    return;
+  }
+
+  mpl.innerHTML =
+    `<div style="padding:10px 14px;font-size:12px;color:var(--muted);font-weight:500">
+      Composição de: <strong style="color:var(--txt)">${p.nome}</strong>
+    </div>` +
+    composicao.map(m =>
+      `<div class="tree-item tree-child">
+        <span style="flex:1">${m.nome}</span>
+        <span style="color:var(--muted);font-size:12px">${m.qtd} un.</span>
+      </div>`).join('');
 }
 
-function salvarGrupo() {
+// ------------------- GRUPOS -------------------
+
+async function salvarGrupo() {
+  const orgId = await getOrgId();
+  if (!orgId) return;
+
   const id = document.getElementById('mg-id').value;
-  const obj = { id:id||uid(), nome:document.getElementById('mg-nome').value||'Grupo' };
-  if (id) { const idx = gruposEst.findIndex(g=>g.id===id); if(idx>=0) gruposEst[idx]=obj; } else gruposEst.push(obj);
-  save('gmp_grupos', gruposEst);
+  const nome = document.getElementById('mg-nome').value || 'Grupo';
+
+  if (id) {
+    const { error } = await window.supabase
+      .from('grupos_produtos')
+      .update({ nome, org_id: orgId })
+      .eq('id', id)
+      .eq('org_id', orgId);
+    if (error) console.error(error);
+  } else {
+    const { error } = await window.supabase
+      .from('grupos_produtos')
+      .insert({ nome, org_id: orgId });
+    if (error) console.error(error);
+  }
+
   closeModal('modal-grupo');
-  renderProdutos();
+  await renderProdutos();
 }
+
 function editarGrupo(id) {
-  const g = gruposEst.find(g=>g.id===id);
+  const g = gruposEst.find(x => x.id === id);
   if (!g) return;
+
   document.getElementById('modal-grupo-title').textContent = 'Editar Grupo';
   document.getElementById('mg-id').value = g.id;
   document.getElementById('mg-nome').value = g.nome;
+
   openModal('modal-grupo');
 }
-function excluirGrupo(id) {
+
+async function excluirGrupo(id) {
+  const orgId = await getOrgId();
+  if (!orgId) return;
   if (!confirm('Remover este grupo?')) return;
-  gruposEst = gruposEst.filter(g=>g.id!==id);
-  save('gmp_grupos', gruposEst);
-  renderProdutos();
+
+  const { error } = await window.supabase
+    .from('grupos_produtos')
+    .delete()
+    .eq('id', id)
+    .eq('org_id', orgId);
+
+  if (error) console.error(error); // pode falhar se houver FK/referências
+
+  await renderProdutos();
 }
+
+// ------------------- PRODUTOS -------------------
 
 function addMpRow() {
   const div = document.createElement('div');
   div.className = 'mp-row';
   div.style.cssText = 'display:flex;gap:6px';
-  div.innerHTML = `<input class="fi fi-sm" style="flex:1" placeholder="Material"><input class="fi fi-sm" style="width:80px" type="number" placeholder="Qtd"><button class="btn btn-gray" style="padding:4px 8px;font-size:12px" onclick="removeMpRow(this)">✕</button>`;
+  div.innerHTML = `
+    <input class="fi fi-sm" style="flex:1" placeholder="Material">
+    <input class="fi fi-sm" style="width:80px" type="number" placeholder="Qtd">
+    <button class="btn btn-gray" style="padding:4px 8px;font-size:12px" onclick="removeMpRow(this)">✕</button>
+  `;
   document.getElementById('mp-inputs').appendChild(div);
 }
+
 function removeMpRow(btn) {
   const rows = document.querySelectorAll('#mp-inputs .mp-row');
   if (rows.length > 1) btn.parentElement.remove();
 }
 
-function salvarProdutosProd() {
+async function salvarProdutosProd() {
   const id = document.getElementById('mep-id').value;
+
   const mpRows = document.querySelectorAll('#mp-inputs .mp-row');
-  const mp = [];
+  const composicao = [];
+
   mpRows.forEach(row => {
     const inputs = row.querySelectorAll('input');
-    if (inputs[0].value.trim()) mp.push({ nome: inputs[0].value.trim(), qtd: parseFloat(inputs[1].value)||1 });
+    const nome = inputs[0].value.trim();
+    if (nome) {
+      composicao.push({ nome, qtd: parseFloat(inputs[1].value) || 1 });
+    }
   });
-  const obj = { id:id||uid(), grupoId:document.getElementById('mep-grupo').value, subgrupo:document.getElementById('mep-subgrupo').value, nome:document.getElementById('mep-nome').value||'Produto', preco:parseFloat(document.getElementById('mep-preco').value)||0, unid:document.getElementById('mep-unid').value, mp };
-  if (id) { const idx = prodsEst.findIndex(p=>p.id===id); if(idx>=0) prodsEst[idx]=obj; } else prodsEst.push(obj);
-  save('gmp_prods', prodsEst);
+
+  const grupo_id = document.getElementById('mep-grupo').value;
+  const subgrupo = document.getElementById('mep-subgrupo').value || null;
+  const nome = document.getElementById('mep-nome').value || 'Produto';
+  const preco = parseFloat(document.getElementById('mep-preco').value) || 0;
+  const unid = document.getElementById('mep-unid').value;
+
+  // Ledger B começa vazio; composição fica em mp.composicao
+  const mp = { composicao, movimentos: [] };
+
+  const payload = { grupo_id, subgrupo, nome, preco, unid, mp };
+
+  if (id) {
+    const { error } = await window.supabase
+      .from('prods_est')
+      .update(payload)
+      .eq('id', id);
+    if (error) console.error(error);
+  } else {
+    const { error } = await window.supabase
+      .from('prods_est')
+      .insert(payload);
+    if (error) console.error(error);
+  }
+
   closeModal('modal-produtos-prod');
-  renderProdutos();
+  await renderProdutos();
 }
+
 function editarProdutosProd(id) {
-  const p = prodsEst.find(p=>p.id===id);
+  const p = prodsEst.find(x => x.id === id);
   if (!p) return;
+
   document.getElementById('modal-ep-title').textContent = 'Editar Produto';
   document.getElementById('mep-id').value = p.id;
-  populateGrupoSelect(p.grupoId);
-  document.getElementById('mep-subgrupo').value = p.subgrupo||'';
+
+  populateGrupoSelect(p.grupo_id);
+
+  document.getElementById('mep-subgrupo').value = p.subgrupo || '';
   document.getElementById('mep-nome').value = p.nome;
   document.getElementById('mep-preco').value = p.preco;
-  document.getElementById('mep-unid').value = p.unid||'un';
+  document.getElementById('mep-unid').value = p.unid || 'un';
+
   const container = document.getElementById('mp-inputs');
   container.innerHTML = '';
-  const mps = (p.mp && p.mp.length) ? p.mp : [{nome:'',qtd:1}];
+
+  const mpObj = (p.mp && typeof p.mp === 'object') ? p.mp : null;
+  const composicao = mpObj?.composicao || [];
+
+  const mps = composicao.length ? composicao : [{ nome: '', qtd: 1 }];
+
   mps.forEach(m => {
     const div = document.createElement('div');
     div.className = 'mp-row';
     div.style.cssText = 'display:flex;gap:6px';
-    div.innerHTML = `<input class="fi fi-sm" style="flex:1" placeholder="Material" value="${m.nome}"><input class="fi fi-sm" style="width:80px" type="number" placeholder="Qtd" value="${m.qtd}"><button class="btn btn-gray" style="padding:4px 8px;font-size:12px" onclick="removeMpRow(this)">✕</button>`;
+    div.innerHTML = `
+      <input class="fi fi-sm" style="flex:1" placeholder="Material" value="${m.nome}">
+      <input class="fi fi-sm" style="width:80px" type="number" placeholder="Qtd" value="${m.qtd}">
+      <button class="btn btn-gray" style="padding:4px 8px;font-size:12px" onclick="removeMpRow(this)">✕</button>
+    `;
     container.appendChild(div);
   });
+
   openModal('modal-produtos-prod');
 }
-function excluirProdutosProd(id) {
+
+async function excluirProdutosProd(id) {
   if (!confirm('Remover este produto?')) return;
-  prodsEst = prodsEst.filter(p=>p.id!==id);
-  save('gmp_prods', prodsEst);
-  renderProdutos();
+
+  const { error } = await window.supabase
+    .from('prods_est')
+    .delete()
+    .eq('id', id);
+
+  if (error) console.error(error);
+
+  await renderProdutos();
 }
+
+// ------------------- SELECT GRUPO -------------------
+
 function populateGrupoSelect(selectedId) {
   const sel = document.getElementById('mep-grupo');
-  sel.innerHTML = gruposEst.map(g=>`<option value="${g.id}" ${g.id===selectedId?'selected':''}>${g.nome}</option>`).join('');
+  if (!sel) return;
+
+  const list = gruposEst || [];
+
+  sel.innerHTML = list.map(g =>
+    `<option value="${g.id}" ${g.id === selectedId ? 'selected' : ''}>${g.nome}</option>`
+  ).join('');
 }
 
 // ===== ORÇAMENTO =====
